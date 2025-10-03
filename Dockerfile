@@ -1,5 +1,5 @@
-# Use OpenJDK 11 as base image
-FROM openjdk:11-jre-slim
+# Use OpenJDK 11 JDK (not JRE) for compilation
+FROM openjdk:11-jdk-slim
 
 # Set working directory
 WORKDIR /app
@@ -8,14 +8,9 @@ WORKDIR /app
 COPY src/ src/
 COPY pom.xml .
 
-# Install Maven and build the application
-RUN apt-get update && \
-    apt-get install -y maven && \
-    mkdir -p target/classes && \
-    javac --release 11 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java && \
-    apt-get remove -y maven && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
+# Build the application (no need for Maven since we're using javac directly)
+RUN mkdir -p target/classes && \
+    javac --release 11 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java
 
 # Expose port
 EXPOSE 8080

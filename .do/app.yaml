@@ -6,13 +6,10 @@ services:
     repo: AdeepaK2/board.com-collaborative-whiteboard-with-java-networking
     branch: main
   run_command: java -cp target/classes org.example.server.WebSocketWhiteboardServerSimple
-  environment_slug: java
+  environment_slug: docker
   instance_count: 1
   instance_size_slug: basic-xxs
   http_port: 8080
-  build_command: |
-    mkdir -p target/classes
-    javac --release 11 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java
   envs:
   - key: PORT
     value: "8080"
