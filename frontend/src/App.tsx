@@ -88,8 +88,11 @@ function App() {
     }
 
     setConnectionStatus('Connecting...');
-    // Use environment variable for WebSocket URL, fallback to localhost for development
-    const wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080';
+    // Use environment variable for WebSocket URL, fallback to same domain for production
+    const wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 
+                  (window.location.protocol === 'https:' ? 
+                   `wss://${window.location.host}/ws` : 
+                   'ws://localhost:8080');
     const ws = new WebSocket(wsUrl);
     
     ws.onopen = () => {

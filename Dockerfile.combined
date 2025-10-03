@@ -1,0 +1,43 @@
+# Multi-stage build: Frontend + Backend in one container
+FROM node:18-alpine as frontend-build
+
+# Build frontend
+WORKDIR /frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+# Java backend stage
+FROM openjdk:11-jdk-slim
+
+WORKDIR /app
+
+# Install nginx to serve frontend
+RUN apt-get update && \
+    apt-get install -y nginx && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy backend source
+COPY src/ src/
+COPY pom.xml .
+
+# Build Java backend
+RUN mkdir -p target/classes && \
+    javac --release 11 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java
+
+# Copy built frontend
+COPY --from=frontend-build /frontend/dist /usr/share/nginx/html
+
+# Copy nginx config
+COPY nginx-combined.conf /etc/nginx/nginx.conf
+
+# Create startup script
+RUN echo '#!/bin/bash\n\
+nginx -g "daemon off;" &\n\
+java -cp target/classes org.example.server.WebSocketWhiteboardServerSimple\n\
+' > /app/start.sh && chmod +x /app/start.sh
+
+EXPOSE 80 8080
+
+CMD ["/app/start.sh"]

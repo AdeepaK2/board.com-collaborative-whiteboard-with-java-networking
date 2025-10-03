@@ -1,0 +1,17 @@
+name: whiteboard-app
+services:
+- name: app
+  source_dir: /
+  github:
+    repo: AdeepaK2/board.com-collaborative-whiteboard-with-java-networking
+    branch: main
+  dockerfile_path: Dockerfile.combined
+  environment_slug: docker
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 80
+  routes:
+  - path: /
+  envs:
+  - key: PORT
+    value: "80"
