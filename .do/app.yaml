@@ -1,0 +1,39 @@
+name: whiteboard-app
+services:
+- name: backend
+  source_dir: /
+  github:
+    repo: AdeepaK2/board.com-collaborative-whiteboard-with-java-networking
+    branch: main
+  run_command: java -cp target/classes org.example.server.WebSocketWhiteboardServerSimple
+  environment_slug: java
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 8080
+  build_command: |
+    mkdir -p target/classes
+    javac --release 11 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java
+  envs:
+  - key: PORT
+    value: "8080"
+
+- name: frontend
+  source_dir: /frontend
+  github:
+    repo: AdeepaK2/board.com-collaborative-whiteboard-with-java-networking
+    branch: main
+  build_command: npm run build
+  run_command: npm run preview -- --host 0.0.0.0 --port $PORT
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 5173
+  routes:
+  - path: /
+  envs:
+  - key: VITE_WEBSOCKET_URL
+    value: ${backend.PRIVATE_URL}
+
+domains:
+- domain: your-whiteboard-app.ondigitalocean.app
+  type: PRIMARY

@@ -88,7 +88,9 @@ function App() {
     }
 
     setConnectionStatus('Connecting...');
-    const ws = new WebSocket('ws://localhost:8080');
+    // Use environment variable for WebSocket URL, fallback to localhost for development
+    const wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080';
+    const ws = new WebSocket(wsUrl);
     
     ws.onopen = () => {
       console.log('Connected to server');
