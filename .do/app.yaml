@@ -29,7 +29,7 @@ services:
   - path: /
   envs:
   - key: VITE_WEBSOCKET_URL
-    value: wss://coral-app-tyjyd.ondigitalocean.app:8080
+    value: wss://coral-app-tyjyd.ondigitalocean.app/ws
 
 domains:
 - domain: your-whiteboard-app.ondigitalocean.app
