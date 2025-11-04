@@ -18,6 +18,8 @@ public class Room implements Serializable {
     private List<String> drawingHistory;
     private int maxParticipants;
     private boolean isPublic;
+    private String password; // Password for private rooms (null if no password)
+    private Set<String> invitedUsers; // List of users invited to private room
     
     public Room() {
         this.createdTime = System.currentTimeMillis();
@@ -25,6 +27,8 @@ public class Room implements Serializable {
         this.drawingHistory = Collections.synchronizedList(new ArrayList<>());
         this.maxParticipants = 50;
         this.isPublic = true;
+        this.password = null;
+        this.invitedUsers = ConcurrentHashMap.newKeySet();
     }
     
     public Room(String roomId, String roomName, String creatorUsername) {
@@ -75,7 +79,24 @@ public class Room implements Serializable {
     
     public boolean isPublic() { return isPublic; }
     public void setPublic(boolean isPublic) { this.isPublic = isPublic; }
-    
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public boolean hasPassword() { return password != null && !password.isEmpty(); }
+
+    public boolean validatePassword(String inputPassword) {
+        if (password == null || password.isEmpty()) {
+            return true; // No password required
+        }
+        return password.equals(inputPassword);
+    }
+
+    public Set<String> getInvitedUsers() { return new HashSet<>(invitedUsers); }
+    public void addInvitedUser(String username) { invitedUsers.add(username); }
+    public void removeInvitedUser(String username) { invitedUsers.remove(username); }
+    public boolean isUserInvited(String username) { return invitedUsers.contains(username); }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

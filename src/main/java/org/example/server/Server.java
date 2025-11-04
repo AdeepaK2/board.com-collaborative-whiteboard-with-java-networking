@@ -163,40 +163,70 @@ public class Server {
             case SEND_TO_SENDER:
                 sendMessage(sender, result.message);
                 break;
-                
+
             case BROADCAST_TO_ROOM:
                 broadcastToRoom(result.roomId, result.message, sender);
                 break;
-                
+
             case JOIN_ROOM:
                 // Send confirmation to sender
                 sendMessage(sender, result.message);
-                
+
                 // Send drawing history
                 if (result.history != null) {
                     for (String msg : result.history) {
                         sendMessage(sender, msg);
                     }
                 }
-                
+
                 // Notify others in room
                 if (result.broadcastMessage != null) {
                     broadcastToRoom(result.roomId, result.broadcastMessage, sender);
                 }
-                
+
                 // Broadcast updated room list
                 broadcastRoomList();
                 break;
-                
+
             case BROADCAST_ROOM_LIST:
                 sendMessage(sender, result.message);
                 broadcastRoomList();
                 break;
-                
+
+            case BROADCAST_NEW_PUBLIC_ROOM:
+                // Send confirmation to creator
+                sendMessage(sender, result.message);
+
+                // Broadcast notification to ALL connected clients
+                if (result.broadcastMessage != null) {
+                    for (Socket client : clients.keySet()) {
+                        sendMessage(client, result.broadcastMessage);
+                    }
+                }
+
+                // Broadcast updated room list
+                broadcastRoomList();
+                break;
+
+            case MULTICAST_TO_INVITED_USERS:
+                // Send confirmation to creator
+                sendMessage(sender, result.message);
+
+                // Multicast notification to invited users only
+                if (result.broadcastMessage != null && result.invitedUsers != null) {
+                    for (Map.Entry<Socket, String> entry : clients.entrySet()) {
+                        String username = entry.getValue();
+                        if (result.invitedUsers.contains(username)) {
+                            sendMessage(entry.getKey(), result.broadcastMessage);
+                        }
+                    }
+                }
+                break;
+
             case ERROR:
                 sendMessage(sender, result.message);
                 break;
-                
+
             case NO_ACTION:
             default:
                 break;
