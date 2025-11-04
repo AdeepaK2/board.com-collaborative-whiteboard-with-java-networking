@@ -10,7 +10,7 @@ COPY pom.xml .
 
 # Build the application (no need for Maven since we're using javac directly)
 RUN mkdir -p target/classes && \
-    javac --release 21 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java
+    javac --release 21 -cp "src/main/java" -d target/classes src/main/java/org/example/server/MultiRoomWebSocketServer.java
 
 # Expose port
 EXPOSE 8080
@@ -19,4 +19,4 @@ EXPOSE 8080
 ENV PORT=8080
 
 # Run the application
-CMD ["java", "-cp", "target/classes", "org.example.server.WebSocketWhiteboardServerSimple"]
+CMD ["java", "-cp", "target/classes", "org.example.Main"]

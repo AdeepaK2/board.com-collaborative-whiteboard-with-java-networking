@@ -71,8 +71,8 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.example.server.WebSocketWhiteboardServer</mainClass>
-                                </transformer>
+                                        <mainClass>org.example.Main</mainClass>
+                                    </transformer>
                             </transformers>
                             <finalName>whiteboard-server</finalName>
                         </configuration>
@@ -91,7 +91,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>org.example.server.WebSocketWhiteboardServer</mainClass>
+                            <mainClass>org.example.Main</mainClass>
                         </manifest>
                     </archive>
                     <finalName>whiteboard-server-all</finalName>

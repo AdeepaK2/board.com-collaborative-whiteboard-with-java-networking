@@ -1,4 +1,12 @@
 @echo off
+echo ========================================
+echo   Whiteboard Server
+echo ========================================
+echo.
+echo Starting WebSocket server...
+echo.
+
 cd /d "%~dp0"
-echo Starting WebSocket Server...
-"C:\Program Files\Apache\Maven\bin\mvn.cmd" clean compile exec:java -Dexec.mainClass=org.example.server.WebSocketWhiteboardServer
+mvn exec:java -Dexec.mainClass="org.example.Main"
+
+pause
