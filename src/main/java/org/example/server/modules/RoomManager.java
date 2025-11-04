@@ -22,6 +22,39 @@ public class RoomManager {
         System.out.println("🎨 Created room: " + roomName + " [" + roomId + "]");
         return room;
     }
+
+    /**
+     * Create a new room with public/private settings and optional password
+     * @param roomId Unique room identifier
+     * @param roomName Display name of the room
+     * @param creatorUsername Username of the creator
+     * @param isPublic True for public room, false for private
+     * @param password Optional password (can be null)
+     * @param invitedUsers List of usernames invited to private room (can be null)
+     */
+    public Room createRoom(String roomId, String roomName, String creatorUsername,
+                          boolean isPublic, String password, List<String> invitedUsers) {
+        Room room = new Room(roomId, roomName, creatorUsername);
+        room.setPublic(isPublic);
+
+        if (password != null && !password.isEmpty()) {
+            room.setPassword(password);
+        }
+
+        if (invitedUsers != null && !isPublic) {
+            for (String username : invitedUsers) {
+                room.addInvitedUser(username);
+            }
+        }
+
+        rooms.put(roomId, room);
+
+        String roomType = isPublic ? "public" : "private";
+        String passwordInfo = room.hasPassword() ? " (password protected)" : "";
+        System.out.println("🎨 Created " + roomType + " room: " + roomName + " [" + roomId + "]" + passwordInfo);
+
+        return room;
+    }
     
     /**
      * Get a room by ID
