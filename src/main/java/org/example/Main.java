@@ -1,20 +1,14 @@
 package org.example;
 
-import org.example.server.WebSocketWhiteboardServer;
+import org.example.server.Server;
 
 /**
- * Main entry point for the Whiteboard WebSocket Server
- * This server communicates with web-based clients (React/TypeScript frontend)
- * via WebSocket protocol on port 8080
+ * Main entry point for the Whiteboard Server
+ * Starts the WebSocket server on port 8080 for React/TypeScript frontend
  */
 public class Main {
     public static void main(String[] args) {
-        System.out.println("========================================");
-        System.out.println("  Whiteboard WebSocket Server");
-        System.out.println("  Version 1.0");
-        System.out.println("========================================\n");
-
-        // Start the WebSocket server
-        WebSocketWhiteboardServer.main(args);
+        // Start the server
+        Server.main(args);
     }
 }
