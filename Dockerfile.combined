@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Java backend stage
-FROM openjdk:11-jdk-slim
+FROM openjdk:21-jdk-slim
 
 WORKDIR /app
 
@@ -24,7 +24,7 @@ COPY pom.xml .
 
 # Build Java backend
 RUN mkdir -p target/classes && \
-    javac --release 11 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java
+    javac --release 21 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java
 
 # Copy built frontend
 COPY --from=frontend-build /frontend/dist /usr/share/nginx/html

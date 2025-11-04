@@ -1,14 +1,13 @@
 package org.example.server;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,8 +25,12 @@ public class WebSocketWhiteboardServer {
     private static volatile boolean running = true;
 
     public static void main(String[] args) {
+        System.out.println("===========================================");
         System.out.println("Starting Whiteboard WebSocket Server on port " + PORT);
-        System.out.println("React frontend should connect to: ws://localhost:" + PORT);
+        System.out.println("===========================================");
+        displayNetworkAddresses();
+        System.out.println("===========================================");
+        System.out.println("Waiting for client connections...");
         
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (running) {
@@ -290,5 +293,77 @@ public class WebSocketWhiteboardServer {
 
     public static void stopServer() {
         running = false;
+    }
+    
+    /**
+     * Display all available network addresses for client connections
+     */
+    private static void displayNetworkAddresses() {
+        try {
+            System.out.println("\nWebSocket Server Addresses (use in React frontend):");
+            System.out.println("Local connection: ws://localhost:" + PORT);
+            System.out.println("                  ws://127.0.0.1:" + PORT);
+            
+            // Get all network interfaces
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                
+                // Skip loopback and inactive interfaces
+                if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+                    continue;
+                }
+                
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    
+                    // Only show IPv4 addresses
+                    if (address instanceof Inet4Address) {
+                        String hostAddress = address.getHostAddress();
+                        System.out.println("Network connection: ws://" + hostAddress + ":" + PORT + 
+                                         " (" + networkInterface.getDisplayName() + ")");
+                    }
+                }
+            }
+            
+            System.out.println("\n📱 Frontend Configuration:");
+            System.out.println("Update your .env file or use:");
+            String localIP = getLocalIPAddress();
+            System.out.println("VITE_WEBSOCKET_URL=ws://" + localIP + ":" + PORT);
+            
+        } catch (SocketException e) {
+            System.err.println("Error getting network addresses: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Get the primary local network IP address
+     */
+    public static String getLocalIPAddress() {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                
+                // Skip loopback and inactive interfaces
+                if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+                    continue;
+                }
+                
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    
+                    // Return first IPv4 address found
+                    if (address instanceof Inet4Address) {
+                        return address.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            System.err.println("Error getting local IP: " + e.getMessage());
+        }
+        return "localhost";
     }
 }

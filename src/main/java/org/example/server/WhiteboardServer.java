@@ -31,7 +31,13 @@ public class WhiteboardServer {
         try {
             serverSocket = new ServerSocket(PORT);
             running = true;
+            
+            // Display all network addresses
+            System.out.println("===========================================");
             System.out.println("Whiteboard Server started on port " + PORT);
+            System.out.println("===========================================");
+            displayNetworkAddresses();
+            System.out.println("===========================================");
             System.out.println("Waiting for client connections...");
             
             while (running) {
@@ -148,6 +154,71 @@ public class WhiteboardServer {
      */
     public int getClientCount() {
         return clients.size();
+    }
+    
+    /**
+     * Display all available network addresses for client connections
+     */
+    private void displayNetworkAddresses() {
+        try {
+            System.out.println("\nServer IP Addresses (use these to connect from other devices):");
+            System.out.println("Local connection: localhost or 127.0.0.1:" + PORT);
+            
+            // Get all network interfaces
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                
+                // Skip loopback and inactive interfaces
+                if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+                    continue;
+                }
+                
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    
+                    // Only show IPv4 addresses (easier for users)
+                    if (address instanceof Inet4Address) {
+                        String hostAddress = address.getHostAddress();
+                        System.out.println("Network connection: " + hostAddress + ":" + PORT + 
+                                         " (" + networkInterface.getDisplayName() + ")");
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            System.err.println("Error getting network addresses: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Get the primary local network IP address (for GUI display)
+     */
+    public static String getLocalIPAddress() {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                
+                // Skip loopback and inactive interfaces
+                if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+                    continue;
+                }
+                
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    
+                    // Return first IPv4 address found
+                    if (address instanceof Inet4Address) {
+                        return address.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            System.err.println("Error getting local IP: " + e.getMessage());
+        }
+        return "localhost";
     }
     
     public static void main(String[] args) {

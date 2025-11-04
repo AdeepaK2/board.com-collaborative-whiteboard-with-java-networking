@@ -4,6 +4,7 @@ import org.example.client.WhiteboardClient;
 import org.example.server.WhiteboardServer;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * Main entry point for the Live Whiteboard Application
@@ -63,32 +64,62 @@ public class Main {
         System.out.println("Starting Whiteboard Server...");
         
         SwingUtilities.invokeLater(() -> {
+            String localIP = WhiteboardServer.getLocalIPAddress();
+            
             int confirm = JOptionPane.showConfirmDialog(
                 null,
-                "Starting Whiteboard Server on port 12345.\n" +
+                "Starting Whiteboard Server on port 12345.\n\n" +
+                "Share this IP with others to connect:\n" +
+                localIP + ":12345\n\n" +
                 "The server will run until you close this application.\n" +
                 "Continue?",
                 "Start Server",
-                JOptionPane.YES_NO_OPTION
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE
             );
             
             if (confirm == JOptionPane.YES_OPTION) {
+                WhiteboardServer server = new WhiteboardServer();
+                
                 // Start server in a separate thread
-                Thread serverThread = new Thread(() -> {
-                    WhiteboardServer server = new WhiteboardServer();
-                    server.start();
-                });
+                Thread serverThread = new Thread(() -> server.start());
                 serverThread.start();
                 
                 // Show server status window
                 JFrame serverFrame = new JFrame("Whiteboard Server");
                 serverFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                serverFrame.setSize(400, 200);
+                serverFrame.setSize(500, 300);
                 serverFrame.setLocationRelativeTo(null);
                 
-                JLabel statusLabel = new JLabel("<html><center>Whiteboard Server is running<br>Port: 12345<br><br>Close this window to stop the server</center></html>");
-                statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-                serverFrame.add(statusLabel);
+                JTextArea statusArea = new JTextArea();
+                statusArea.setEditable(false);
+                statusArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                statusArea.setText(
+                    "╔════════════════════════════════════════════╗\n" +
+                    "║     WHITEBOARD SERVER IS RUNNING          ║\n" +
+                    "╚════════════════════════════════════════════╝\n\n" +
+                    "Server Port: 12345\n\n" +
+                    "CONNECTION INSTRUCTIONS:\n" +
+                    "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+                    "For LOCAL connection (same computer):\n" +
+                    "  Use: localhost\n\n" +
+                    "For NETWORK connection (other devices):\n" +
+                    "  Use: " + localIP + "\n\n" +
+                    "Make sure all devices are on the same WiFi!\n\n" +
+                    "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+                    "Close this window to stop the server."
+                );
+                
+                JScrollPane scrollPane = new JScrollPane(statusArea);
+                serverFrame.add(scrollPane);
+                
+                // Add shutdown hook
+                serverFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        server.stop();
+                    }
+                });
                 
                 serverFrame.setVisible(true);
             } else {
@@ -100,45 +131,8 @@ public class Main {
     private static void startClient() {
         System.out.println("Starting Whiteboard Client...");
         
-        // Use the existing client main method
-        SwingUtilities.invokeLater(() -> {
-            String username = JOptionPane.showInputDialog(
-                null,
-                "Enter your username:",
-                "Join Whiteboard",
-                JOptionPane.QUESTION_MESSAGE
-            );
-            
-            if (username != null && !username.trim().isEmpty()) {
-                username = username.trim();
-                
-                WhiteboardClient client = new WhiteboardClient(username);
-                if (client.connect()) {
-                    // Success will be handled by WhiteboardClient
-                    WhiteboardClient.main(new String[]{username});
-                } else {
-                    JOptionPane.showMessageDialog(
-                        null,
-                        "Failed to connect to server.\n" +
-                        "Please make sure the server is running on localhost:12345",
-                        "Connection Error",
-                        JOptionPane.ERROR_MESSAGE
-                    );
-                    
-                    // Offer to start server instead
-                    int choice = JOptionPane.showConfirmDialog(
-                        null,
-                        "Would you like to start a server instead?",
-                        "Start Server?",
-                        JOptionPane.YES_NO_OPTION
-                    );
-                    
-                    if (choice == JOptionPane.YES_OPTION) {
-                        startServer();
-                    }
-                }
-            }
-        });
+        // Use the existing client main method which now has the connection dialog
+        WhiteboardClient.main(new String[]{});
     }
     
     private static void printUsage() {

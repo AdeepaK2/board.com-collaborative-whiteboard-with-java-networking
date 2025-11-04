@@ -45,6 +45,35 @@ The application uses Java Object Serialization over TCP sockets:
 mvn clean compile
 ```
 
+## 🌐 Local Network Setup (Connect Multiple Devices)
+
+**Want to use this with multiple PCs on your WiFi? See the [Network Setup Guide](NETWORK_SETUP_GUIDE.md)**
+
+### Quick Network Setup:
+
+1. **On your laptop (Server):**
+   ```bash
+   start-server-network.bat
+   ```
+   Note the IP address displayed (e.g., `192.168.1.100`)
+
+2. **On other PCs (Clients):**
+   ```bash
+   start-client-network.bat
+   ```
+   - Enter your username
+   - Enter the server IP from step 1
+   - Port: `12345`
+
+3. **Important:**
+   - All devices must be on the **same WiFi**
+   - Windows Firewall may need to allow port 12345
+   - Server must stay running while others are connected
+
+📖 **For detailed instructions, troubleshooting, and firewall setup, see [NETWORK_SETUP_GUIDE.md](NETWORK_SETUP_GUIDE.md)**
+
+---
+
 ### Running the Application
 
 #### Option 1: Using the Main Class (Recommended)
@@ -138,9 +167,18 @@ The client can be configured by modifying `WhiteboardClient.java`:
 ### Network Configuration
 
 For usage across different machines:
-1. Change `SERVER_HOST` in `WhiteboardClient.java` to the server's IP address
-2. Ensure the server machine's firewall allows connections on port 12345
-3. Make sure both machines are on the same network or have proper routing
+1. Start the server - it will display the network IP address automatically
+2. On client machines, enter the server's IP address in the connection dialog
+3. Ensure all devices are on the same WiFi network
+4. Make sure the firewall allows connections on port 12345
+
+**Windows Firewall Command:**
+```powershell
+# Run as Administrator
+netsh advfirewall firewall add rule name="Whiteboard Server" dir=in action=allow protocol=TCP localport=12345
+```
+
+📖 **For complete network setup instructions, see [NETWORK_SETUP_GUIDE.md](NETWORK_SETUP_GUIDE.md)**
 
 ## Technical Details
 

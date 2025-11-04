@@ -1,5 +1,5 @@
-# Use OpenJDK 11 JDK (not JRE) for compilation
-FROM openjdk:11-jdk-slim
+# Use OpenJDK 21 JDK (not JRE) for compilation
+FROM openjdk:21-jdk-slim
 
 # Set working directory
 WORKDIR /app
@@ -10,7 +10,7 @@ COPY pom.xml .
 
 # Build the application (no need for Maven since we're using javac directly)
 RUN mkdir -p target/classes && \
-    javac --release 11 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java
+    javac --release 21 -cp "src/main/java" -d target/classes src/main/java/org/example/server/WebSocketWhiteboardServerSimple.java
 
 # Expose port
 EXPOSE 8080
