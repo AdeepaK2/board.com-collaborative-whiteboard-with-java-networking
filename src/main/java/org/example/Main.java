@@ -1,20 +1,14 @@
 package org.example;
 
-import org.example.server.MultiRoomWebSocketServer;
+import org.example.server.Server;
 
 /**
- * Main entry point for the Multi-Room Whiteboard WebSocket Server
- * This server communicates with web-based clients (React/TypeScript frontend)
- * via WebSocket protocol on port 8080
+ * Main entry point for the Whiteboard Server
+ * Starts the WebSocket server on port 8080 for React/TypeScript frontend
  */
 public class Main {
     public static void main(String[] args) {
-        System.out.println("========================================");
-        System.out.println("  Multi-Room Whiteboard Server");
-        System.out.println("  Version 2.0");
-        System.out.println("========================================\n");
-
-        // Start the multi-room WebSocket server
-        MultiRoomWebSocketServer.main(args);
+        // Start the server
+        Server.main(args);
     }
 }
