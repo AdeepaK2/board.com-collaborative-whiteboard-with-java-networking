@@ -49,6 +49,15 @@ public class MessageHandler {
                 case "draw":
                     return handleDraw(sender, message, clientRooms);
                     
+                case "addShape":
+                    return handleAddShape(sender, message, clientRooms);
+                    
+                case "updateShape":
+                    return handleUpdateShape(sender, message, clientRooms);
+                    
+                case "deleteShape":
+                    return handleDeleteShape(sender, message, clientRooms);
+                    
                 case "clear":
                     return handleClear(sender, clients, clientRooms);
                     
@@ -297,6 +306,66 @@ public class MessageHandler {
             }
         }
         return roomArray;
+    }
+    
+    /**
+     * Handle adding a shape
+     */
+    private MessageResult handleAddShape(Socket sender, String message,
+                                        Map<Socket, String> clientRooms) {
+        String roomId = clientRooms.get(sender);
+        if (roomId == null) {
+            return MessageResult.error("Not in a room");
+        }
+        
+        Room room = roomManager.getRoom(roomId);
+        if (room != null) {
+            // Store shape in room history
+            room.addToDrawingHistory(message);
+            
+            // Broadcast to all users in the room
+            return MessageResult.broadcastToRoom(message, roomId);
+        }
+        
+        return MessageResult.noAction();
+    }
+    
+    /**
+     * Handle updating a shape (move, resize, fill)
+     */
+    private MessageResult handleUpdateShape(Socket sender, String message,
+                                           Map<Socket, String> clientRooms) {
+        String roomId = clientRooms.get(sender);
+        if (roomId == null) {
+            return MessageResult.error("Not in a room");
+        }
+        
+        Room room = roomManager.getRoom(roomId);
+        if (room != null) {
+            // Broadcast shape update to all users
+            return MessageResult.broadcastToRoom(message, roomId);
+        }
+        
+        return MessageResult.noAction();
+    }
+    
+    /**
+     * Handle deleting a shape
+     */
+    private MessageResult handleDeleteShape(Socket sender, String message,
+                                           Map<Socket, String> clientRooms) {
+        String roomId = clientRooms.get(sender);
+        if (roomId == null) {
+            return MessageResult.error("Not in a room");
+        }
+        
+        Room room = roomManager.getRoom(roomId);
+        if (room != null) {
+            // Broadcast shape deletion to all users
+            return MessageResult.broadcastToRoom(message, roomId);
+        }
+        
+        return MessageResult.noAction();
     }
     
     /**
