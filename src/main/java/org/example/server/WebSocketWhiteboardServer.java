@@ -207,6 +207,12 @@ public class WebSocketWhiteboardServer {
                 case "shape":
                     handleShapeMessage(sender, message);
                     break;
+                case "update":
+                    handleUpdateMessage(sender, message);
+                    break;
+                case "delete":
+                    handleDeleteMessage(sender, message);
+                    break;
                 case "cursor":
                     handleCursorMessage(sender, message);
                     break;
@@ -261,6 +267,74 @@ public class WebSocketWhiteboardServer {
     private static void handleCursorMessage(Socket sender, String message) {
         // Just broadcast cursor updates, don't store them
         broadcastMessage(message, sender);
+    }
+
+    private static void handleUpdateMessage(Socket sender, String message) {
+        // Update drawing history - replace old version with updated one
+        try {
+            JsonObject json = gson.fromJson(message, JsonObject.class);
+            String elementId = json.get("elementId").getAsString();
+            
+            // Remove old version from history
+            drawingHistory.removeIf(historyMsg -> {
+                try {
+                    JsonObject historyJson = gson.fromJson(historyMsg, JsonObject.class);
+                    String historyType = historyJson.get("type").getAsString();
+                    
+                    if ("draw".equals(historyType) && historyJson.has("stroke")) {
+                        JsonObject stroke = historyJson.getAsJsonObject("stroke");
+                        return stroke.has("id") && stroke.get("id").getAsString().equals(elementId);
+                    } else if ("shape".equals(historyType) && historyJson.has("shape")) {
+                        JsonObject shape = historyJson.getAsJsonObject("shape");
+                        return shape.has("id") && shape.get("id").getAsString().equals(elementId);
+                    }
+                } catch (Exception e) {
+                    // Skip malformed messages
+                }
+                return false;
+            });
+            
+            // Add updated version to history
+            drawingHistory.add(message);
+            
+            // Broadcast update to all other clients
+            broadcastMessage(message, sender);
+            System.out.println("Broadcasted update message from " + clients.get(sender));
+        } catch (Exception e) {
+            System.err.println("Error handling update message: " + e.getMessage());
+        }
+    }
+
+    private static void handleDeleteMessage(Socket sender, String message) {
+        try {
+            JsonObject json = gson.fromJson(message, JsonObject.class);
+            String elementId = json.get("elementId").getAsString();
+            
+            // Remove from drawing history
+            drawingHistory.removeIf(historyMsg -> {
+                try {
+                    JsonObject historyJson = gson.fromJson(historyMsg, JsonObject.class);
+                    String historyType = historyJson.get("type").getAsString();
+                    
+                    if ("draw".equals(historyType) && historyJson.has("stroke")) {
+                        JsonObject stroke = historyJson.getAsJsonObject("stroke");
+                        return stroke.has("id") && stroke.get("id").getAsString().equals(elementId);
+                    } else if ("shape".equals(historyType) && historyJson.has("shape")) {
+                        JsonObject shape = historyJson.getAsJsonObject("shape");
+                        return shape.has("id") && shape.get("id").getAsString().equals(elementId);
+                    }
+                } catch (Exception e) {
+                    // Skip malformed messages
+                }
+                return false;
+            });
+            
+            // Broadcast delete to all other clients
+            broadcastMessage(message, sender);
+            System.out.println("Broadcasted delete message from " + clients.get(sender));
+        } catch (Exception e) {
+            System.err.println("Error handling delete message: " + e.getMessage());
+        }
     }
 
     private static void handleClearMessage(Socket sender) {
