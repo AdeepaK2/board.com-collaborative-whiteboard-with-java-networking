@@ -1,17 +1,24 @@
 package org.example.server;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * WebSocket server for the whiteboard application
@@ -197,6 +204,12 @@ public class WebSocketWhiteboardServer {
                 case "draw":
                     handleDrawMessage(sender, message);
                     break;
+                case "shape":
+                    handleShapeMessage(sender, message);
+                    break;
+                case "cursor":
+                    handleCursorMessage(sender, message);
+                    break;
                 case "clear":
                     handleClearMessage(sender);
                     break;
@@ -234,6 +247,20 @@ public class WebSocketWhiteboardServer {
         // Broadcast to all other clients
         broadcastMessage(message, sender);
         System.out.println("Broadcasted drawing message from " + clients.get(sender));
+    }
+
+    private static void handleShapeMessage(Socket sender, String message) {
+        // Add to drawing history
+        drawingHistory.add(message);
+        
+        // Broadcast to all other clients
+        broadcastMessage(message, sender);
+        System.out.println("Broadcasted shape message from " + clients.get(sender));
+    }
+
+    private static void handleCursorMessage(Socket sender, String message) {
+        // Just broadcast cursor updates, don't store them
+        broadcastMessage(message, sender);
     }
 
     private static void handleClearMessage(Socket sender) {
