@@ -1,0 +1,21 @@
+{
+  "id": "board-1762326928158",
+  "name": "ver 7 - no reload",
+  "createdBy": "hey",
+  "createdAt": 1762326950033,
+  "lastModified": 1762326950036,
+  "strokes": [],
+  "shapes": [
+    {
+      "id": "1762326939262",
+      "type": "circle",
+      "x": 353.7850877633379,
+      "y": 197.33102339071198,
+      "radius": 238.93429479038159,
+      "color": "#000000",
+      "size": 2,
+      "fillColor": "#ff0000",
+      "username": "hey"
+    }
+  ]
+}
