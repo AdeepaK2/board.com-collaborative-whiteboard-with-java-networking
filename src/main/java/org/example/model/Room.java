@@ -16,6 +16,7 @@ public class Room implements Serializable {
     private long createdTime;
     private Set<String> participants;
     private List<String> drawingHistory;
+    private Map<String, ShapeData> shapes; // Store shapes by ID for manipulation
     private int maxParticipants;
     private boolean isPublic;
     private String password; // Password for private rooms (null if no password)
@@ -25,6 +26,7 @@ public class Room implements Serializable {
         this.createdTime = System.currentTimeMillis();
         this.participants = ConcurrentHashMap.newKeySet();
         this.drawingHistory = Collections.synchronizedList(new ArrayList<>());
+        this.shapes = new ConcurrentHashMap<>();
         this.maxParticipants = 50;
         this.isPublic = true;
         this.password = null;
@@ -72,7 +74,15 @@ public class Room implements Serializable {
     
     public List<String> getDrawingHistory() { return new ArrayList<>(drawingHistory); }
     public void addToDrawingHistory(String message) { drawingHistory.add(message); }
-    public void clearDrawingHistory() { drawingHistory.clear(); }
+    public void clearDrawingHistory() { 
+        drawingHistory.clear();
+        shapes.clear();
+    }
+    
+    public Map<String, ShapeData> getShapes() { return new HashMap<>(shapes); }
+    public void addShape(String shapeId, ShapeData shape) { shapes.put(shapeId, shape); }
+    public void removeShape(String shapeId) { shapes.remove(shapeId); }
+    public ShapeData getShape(String shapeId) { return shapes.get(shapeId); }
     
     public int getMaxParticipants() { return maxParticipants; }
     public void setMaxParticipants(int maxParticipants) { this.maxParticipants = maxParticipants; }

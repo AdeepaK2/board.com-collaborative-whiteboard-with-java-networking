@@ -1,6 +1,7 @@
 package org.example.server;
 
 import com.google.gson.JsonObject;
+import com.sun.net.httpserver.HttpServer;
 import org.example.model.Room;
 import org.example.server.modules.MessageHandler;
 import org.example.server.modules.MessageHandler.MessageResult;
@@ -12,6 +13,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 
 /**
  * Main WebSocket Server for Collaborative Whiteboard
@@ -31,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Server {
     private static final int PORT = 8080;
+    private static final int HTTP_PORT = 8081;
     
     // LESSON 6: Thread-safe collections for concurrent access
     private static final Map<Socket, String> clients = new ConcurrentHashMap<>();
@@ -46,6 +49,9 @@ public class Server {
         System.out.println("=================================================");
         System.out.println("🎨 Whiteboard Server");
         System.out.println("=================================================");
+        
+        // Start HTTP API server for board save/load
+        startHttpApiServer();
         
         // LESSON 5: Display all network addresses
         NetworkUtil.displayNetworkAddresses(PORT);
@@ -71,6 +77,21 @@ public class Server {
             }
         } catch (IOException e) {
             System.err.println("Could not start server: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Start HTTP API server for REST endpoints
+     */
+    private static void startHttpApiServer() {
+        try {
+            HttpServer httpServer = HttpServer.create(new InetSocketAddress(HTTP_PORT), 0);
+            httpServer.createContext("/api/boards", new BoardApiHandler(roomManager));
+            httpServer.setExecutor(Executors.newFixedThreadPool(4));
+            httpServer.start();
+            System.out.println("📡 HTTP API Server started on port " + HTTP_PORT);
+        } catch (IOException e) {
+            System.err.println("Failed to start HTTP API server: " + e.getMessage());
         }
     }
 
