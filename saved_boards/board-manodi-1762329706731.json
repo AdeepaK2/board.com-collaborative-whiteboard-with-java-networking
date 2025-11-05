@@ -1,0 +1,31 @@
+{
+  "id": "board-manodi-1762329706731",
+  "name": "test 2",
+  "createdBy": "manodi",
+  "createdAt": 1762329706731,
+  "lastModified": 1762329706736,
+  "strokes": [],
+  "shapes": [
+    {
+      "id": "1762329688446",
+      "type": "circle",
+      "x": 412.9292891028139,
+      "y": 322.9153585122443,
+      "radius": 54.58003239457569,
+      "color": "#000000",
+      "size": 2,
+      "username": "manodi"
+    },
+    {
+      "id": "1762329695580",
+      "type": "rectangle",
+      "x": 512.6338692515371,
+      "y": 215.46115555631127,
+      "width": 392.8360457859692,
+      "height": 81.58559854061579,
+      "color": "#000000",
+      "size": 2,
+      "username": "manodi"
+    }
+  ]
+}
