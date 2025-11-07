@@ -3,14 +3,14 @@ package org.example.model;
 import java.io.Serializable;
 
 /**
- * Represents a geometric shape (rectangle, circle, line, triangle)
+ * Represents a geometric shape (rectangle, circle, line, triangle, text)
  * for the collaborative whiteboard
  */
 public class ShapeData implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String id;
-    private String type; // "rectangle", "circle", "line", "triangle"
+    private String type; // "rectangle", "circle", "line", "triangle", "text"
     private double x;
     private double y;
     private Double width;
@@ -23,6 +23,8 @@ public class ShapeData implements Serializable {
     private String fillColor;
     private String username;
     private long timestamp;
+    private String text; // For text type
+    private Integer fontSize; // For text type
 
     public ShapeData() {}
 
@@ -79,6 +81,12 @@ public class ShapeData implements Serializable {
 
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+    public String getText() { return text; }
+    public void setText(String text) { this.text = text; }
+
+    public Integer getFontSize() { return fontSize; }
+    public void setFontSize(Integer fontSize) { this.fontSize = fontSize; }
 
     @Override
     public String toString() {

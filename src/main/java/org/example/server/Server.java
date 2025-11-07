@@ -242,6 +242,9 @@ public class Server {
                         }
                     }
                 }
+
+                // Broadcast updated room list to all users (each gets their personalized list)
+                broadcastRoomList();
                 break;
 
             case ERROR:
@@ -301,15 +304,20 @@ public class Server {
 
     /**
      * Broadcast room list to all connected clients
+     * Each client receives a personalized list (public rooms + rooms they're invited to)
      */
     private static void broadcastRoomList() {
-        JsonObject response = new JsonObject();
-        response.addProperty("type", "roomList");
-        response.add("rooms", messageHandler.getRoomsAsJson());
-        
-        String message = response.toString();
-        for (Socket client : clients.keySet()) {
-            sendMessage(client, message);
+        for (Map.Entry<Socket, String> entry : clients.entrySet()) {
+            Socket client = entry.getKey();
+            String username = entry.getValue();
+            
+            if (username != null) {
+                JsonObject response = new JsonObject();
+                response.addProperty("type", "roomList");
+                response.add("rooms", messageHandler.getRoomsAsJsonForUser(username));
+                
+                sendMessage(client, response.toString());
+            }
         }
     }
 

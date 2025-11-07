@@ -40,6 +40,9 @@ public class MessageHandler {
                 case "getRooms":
                     return handleGetRooms();
                     
+                case "getActiveUsers":
+                    return handleGetActiveUsers(clients);
+                    
                 case "createRoom":
                     return handleCreateRoom(sender, json, clients, clientRooms);
                     
@@ -84,10 +87,10 @@ public class MessageHandler {
         
         System.out.println("✓ Username set: " + username);
         
-        // Send back room list after username is set
+        // Send back room list after username is set (including rooms user is invited to)
         JsonObject response = new JsonObject();
         response.addProperty("type", "roomList");
-        response.add("rooms", getRoomsAsJson());
+        response.add("rooms", getRoomsAsJsonForUser(username));
         
         return MessageResult.sendToSender(response.toString());
     }
@@ -98,6 +101,45 @@ public class MessageHandler {
         response.add("rooms", getRoomsAsJson());
         
         return MessageResult.sendToSender(response.toString());
+    }
+    
+    private MessageResult handleGetActiveUsers(Map<Socket, String> clients) {
+        JsonObject response = new JsonObject();
+        response.addProperty("type", "activeUsers");
+        
+        JsonArray usersArray = new JsonArray();
+        for (String username : clients.values()) {
+            if (username != null && !username.isEmpty()) {
+                usersArray.add(username);
+            }
+        }
+        
+        response.add("users", usersArray);
+        
+        return MessageResult.sendToSender(response.toString());
+    }
+    
+    /**
+     * Build room list as JSON for a specific user
+     * Returns public rooms + private rooms the user is invited to
+     */
+    public JsonArray getRoomsAsJsonForUser(String username) {
+        JsonArray roomArray = new JsonArray();
+        for (Room room : roomManager.getAllRooms()) {
+            // Include public rooms OR private rooms where user is invited or creator
+            if (room.isPublic() || room.isUserInvited(username) || username.equals(room.getCreatorUsername())) {
+                JsonObject roomObj = new JsonObject();
+                roomObj.addProperty("roomId", room.getRoomId());
+                roomObj.addProperty("roomName", room.getRoomName());
+                roomObj.addProperty("creator", room.getCreatorUsername());
+                roomObj.addProperty("participants", room.getParticipantCount());
+                roomObj.addProperty("maxParticipants", room.getMaxParticipants());
+                roomObj.addProperty("isPublic", room.isPublic());
+                roomObj.addProperty("hasPassword", room.hasPassword());
+                roomArray.add(roomObj);
+            }
+        }
+        return roomArray;
     }
     
     private MessageResult handleCreateRoom(Socket sender, JsonObject json,
