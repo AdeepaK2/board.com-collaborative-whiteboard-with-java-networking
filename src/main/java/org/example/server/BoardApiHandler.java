@@ -1,11 +1,11 @@
 package org.example.server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.example.model.Room;
-import org.example.model.ShapeData;
 import org.example.server.modules.RoomManager;
 import org.example.service.BoardStorageService;
 
@@ -73,13 +73,24 @@ public class BoardApiHandler implements HttpHandler {
         String roomId = request.get("roomId").getAsString();
         String username = request.get("username").getAsString();
         
-        Room room = roomManager.getRoom(roomId);
-        if (room == null) {
-            sendResponse(exchange, 404, createErrorResponse("Room not found"));
-            return;
-        }
+        // Get shapes and strokes from request if provided, otherwise fall back to room data
+        JsonArray shapesJson = request.has("shapes") ? request.getAsJsonArray("shapes") : null;
+        JsonArray strokesJson = request.has("strokes") ? request.getAsJsonArray("strokes") : null;
         
-        BoardStorageService.SaveResult result = BoardStorageService.saveBoard(boardName, room, username);
+        BoardStorageService.SaveResult result;
+        
+        if (shapesJson != null || strokesJson != null) {
+            // Save with provided shapes and strokes
+            result = BoardStorageService.saveBoard(boardName, shapesJson, strokesJson, username);
+        } else {
+            // Fallback to room data
+            Room room = roomManager.getRoom(roomId);
+            if (room == null) {
+                sendResponse(exchange, 404, createErrorResponse("Room not found"));
+                return;
+            }
+            result = BoardStorageService.saveBoard(boardName, room, username);
+        }
         
         if (result.success) {
             Map<String, Object> response = new HashMap<>();

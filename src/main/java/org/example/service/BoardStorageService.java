@@ -2,10 +2,13 @@ package org.example.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 import org.example.model.Room;
 import org.example.model.ShapeData;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,6 +46,7 @@ public class BoardStorageService {
             boardData.boardName = boardName;
             boardData.roomId = room.getRoomId();
             boardData.shapes = new ArrayList<>(room.getShapes().values());
+            boardData.strokes = new ArrayList<>(); // Empty for now
             boardData.savedBy = username;
             boardData.savedAt = timestamp;
             boardData.shapeCount = boardData.shapes.size();
@@ -67,6 +71,55 @@ public class BoardStorageService {
             
             return new SaveResult(true, boardId, "Board saved successfully");
         } catch (IOException e) {
+            return new SaveResult(false, null, "Failed to save board: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Save a board state with shapes and strokes from JSON
+     */
+    public static SaveResult saveBoard(String boardName, JsonArray shapesJson, JsonArray strokesJson, String username) {
+        try {
+            String boardId = generateBoardId();
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            
+            BoardData boardData = new BoardData();
+            boardData.boardId = boardId;
+            boardData.boardName = boardName;
+            boardData.roomId = "";
+            
+            // Parse shapes
+            Type shapesType = new TypeToken<List<ShapeData>>(){}.getType();
+            boardData.shapes = shapesJson != null ? gson.fromJson(shapesJson, shapesType) : new ArrayList<>();
+            
+            // Parse strokes
+            Type strokesType = new TypeToken<List<StrokeData>>(){}.getType();
+            boardData.strokes = strokesJson != null ? gson.fromJson(strokesJson, strokesType) : new ArrayList<>();
+            
+            boardData.savedBy = username;
+            boardData.savedAt = timestamp;
+            boardData.shapeCount = boardData.shapes.size();
+            
+            // Save to file
+            String filename = boardId + ".json";
+            Path filepath = Paths.get(BOARDS_DIR, filename);
+            String json = gson.toJson(boardData);
+            Files.writeString(filepath, json);
+            
+            // Update registry
+            BoardMetadata metadata = new BoardMetadata();
+            metadata.boardId = boardId;
+            metadata.boardName = boardName;
+            metadata.savedBy = username;
+            metadata.savedAt = timestamp;
+            metadata.shapeCount = boardData.shapeCount;
+            metadata.filename = filename;
+            
+            boardRegistry.put(boardId, metadata);
+            saveBoardRegistry();
+            
+            return new SaveResult(true, boardId, "Board saved successfully");
+        } catch (Exception e) {
             return new SaveResult(false, null, "Failed to save board: " + e.getMessage());
         }
     }
@@ -200,9 +253,21 @@ public class BoardStorageService {
         public String boardName;
         public String roomId;
         public List<ShapeData> shapes;
+        public List<StrokeData> strokes;
         public String savedBy;
         public String savedAt;
         public int shapeCount;
+    }
+    
+    public static class StrokeData {
+        public List<DrawPoint> points;
+    }
+    
+    public static class DrawPoint {
+        public double x;
+        public double y;
+        public String color;
+        public double size;
     }
     
     public static class BoardMetadata {
