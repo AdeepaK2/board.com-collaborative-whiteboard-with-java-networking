@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,6 +40,14 @@ public class TimelapseService {
     
     // Thread pool for async video generation
     private static final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+    // Replay step used to build the timeline for timelapse rendering
+    private static class Step {
+        String kind; // "shape" or "stroke"
+        int shapeIndex;
+        int strokeIndex;
+        int pointCount; // for stroke: number of points to reveal
+    }
     
     static {
         try {
@@ -82,33 +89,62 @@ public class TimelapseService {
             TimelapseJobManager.updateProgress(job.jobId, 10, "Loading board data...");
             BoardData boardData = BoardStorageService.loadBoard(boardId);
             
-            // Calculate frame distribution
-            int totalFrames = durationSeconds * FRAME_RATE;
-            int shapesPerFrame = Math.max(1, boardData.shapes.size() / totalFrames);
-            
+            // Build replay timeline: include shapes and incremental stroke points so the
+            // video reflects the drawing process instead of snapping final shapes.
+            TimelapseJobManager.updateProgress(job.jobId, 20, "Building replay timeline...");
+
+            // Each step represents either a shape being added, or an incremental stroke point
+            java.util.List<Step> steps = new java.util.ArrayList<>();
+
+            // Add shapes as single steps (they typically represent discrete actions)
+            if (boardData.shapes != null) {
+                for (int i = 0; i < boardData.shapes.size(); i++) {
+                    Step s = new Step(); s.kind = "shape"; s.shapeIndex = i; s.strokeIndex = -1; s.pointCount = 0;
+                    steps.add(s);
+                }
+            }
+
+            // Add strokes as granular steps: reveal stroke points one-by-one so pen drawings
+            // are animated progressively. If strokes is null it's safe.
+            if (boardData.strokes != null) {
+                for (int si = 0; si < boardData.strokes.size(); si++) {
+                    BoardStorageService.StrokeData sd = boardData.strokes.get(si);
+                    if (sd == null || sd.points == null || sd.points.size() == 0) continue;
+                    // First step represents the first point, then progressively add more
+                    for (int p = 1; p <= sd.points.size(); p++) {
+                        Step s = new Step(); s.kind = "stroke"; s.strokeIndex = si; s.shapeIndex = -1; s.pointCount = p;
+                        steps.add(s);
+                    }
+                }
+            }
+
             // Setup video encoder
-            TimelapseJobManager.updateProgress(job.jobId, 20, "Initializing video encoder...");
+            TimelapseJobManager.updateProgress(job.jobId, 30, "Initializing video encoder...");
+            int totalFrames = Math.max(1, durationSeconds * FRAME_RATE);
             String videoFilename = job.jobId + ".mp4";
             Path videoPath = Paths.get(TIMELAPSE_DIR, videoFilename);
-            
+
             SeekableByteChannel channel = NIOUtils.writableFileChannel(videoPath.toString());
             AWTSequenceEncoder encoder = new AWTSequenceEncoder(channel, Rational.R(FRAME_RATE, 1));
-            
-            // Generate frames
-            TimelapseJobManager.updateProgress(job.jobId, 30, "Rendering frames...");
-            
+
+            // Generate frames by mapping timeline steps into frames.
+            TimelapseJobManager.updateProgress(job.jobId, 40, "Rendering frames...");
+
+            int totalSteps = steps.size();
+            if (totalSteps == 0) totalSteps = 1; // avoid division by zero
+
             for (int frameNum = 0; frameNum < totalFrames; frameNum++) {
-                // Calculate which shapes to include in this frame
-                int shapesToShow = Math.min((frameNum + 1) * shapesPerFrame, boardData.shapes.size());
-                
-                // Render frame
-                BufferedImage frame = renderFrame(boardData.shapes, shapesToShow);
+                // Determine how many steps should be visible at this frame.
+                int stepsToShow = (int) Math.round(((frameNum + 1) / (double) totalFrames) * totalSteps);
+                stepsToShow = Math.min(stepsToShow, totalSteps);
+
+                BufferedImage frame = renderFrame(boardData, steps, stepsToShow);
                 encoder.encodeImage(frame);
-                
-                // Update progress (30% to 90%)
-                int progress = 30 + (int)((frameNum / (double)totalFrames) * 60);
-                if (frameNum % 10 == 0) {
-                    TimelapseJobManager.updateProgress(job.jobId, progress, 
+
+                // Update progress (40% to 90%)
+                int progress = 40 + (int)((frameNum / (double)totalFrames) * 50);
+                if (frameNum % 5 == 0) {
+                    TimelapseJobManager.updateProgress(job.jobId, progress,
                         String.format("Rendering frame %d/%d", frameNum + 1, totalFrames));
                 }
             }
@@ -128,23 +164,59 @@ public class TimelapseService {
     
     /**
      * Render a single frame showing the drawing up to a certain point
+     * Includes both shapes and strokes for complete timelapse
      */
-    private static BufferedImage renderFrame(List<ShapeData> allShapes, int shapesToShow) {
+    private static BufferedImage renderFrame(BoardData boardData, java.util.List<Step> steps, int stepsToShow) {
         BufferedImage image = new BufferedImage(VIDEO_WIDTH, VIDEO_HEIGHT, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = image.createGraphics();
-        
+
         // Enable anti-aliasing for smoother shapes
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
+
         // White background
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-        
-        // Draw shapes in order (timelapse effect)
-        for (int i = 0; i < shapesToShow && i < allShapes.size(); i++) {
-            renderShape(g2d, allShapes.get(i));
+
+        // Determine how many shapes to show and how many points per stroke to reveal
+        int shapeCountVisible = 0;
+        int strokeCount = boardData.strokes != null ? boardData.strokes.size() : 0;
+        int[] strokePointCounts = new int[Math.max(0, strokeCount)];
+
+        for (int i = 0; i < stepsToShow && i < steps.size(); i++) {
+            Step s = steps.get(i);
+            if (s == null || s.kind == null) continue;
+            if ("shape".equals(s.kind)) {
+                shapeCountVisible++;
+            } else if ("stroke".equals(s.kind)) {
+                if (s.strokeIndex >= 0 && s.strokeIndex < strokePointCounts.length) {
+                    strokePointCounts[s.strokeIndex] = Math.max(strokePointCounts[s.strokeIndex], s.pointCount);
+                }
+            }
         }
-        
+
+        // Draw strokes (progressively up to their revealed point counts)
+        if (boardData.strokes != null) {
+            for (int si = 0; si < boardData.strokes.size(); si++) {
+                BoardStorageService.StrokeData sd = boardData.strokes.get(si);
+                int to = Math.min(sd.points.size(), strokePointCounts[si]);
+                if (to <= 1) continue; // need at least 2 points to draw a segment
+                for (int p = 1; p < to; p++) {
+                    BoardStorageService.DrawPoint a = sd.points.get(p - 1);
+                    BoardStorageService.DrawPoint b = sd.points.get(p);
+                    g2d.setColor(parseColor(a.color));
+                    g2d.setStroke(new BasicStroke((float)a.size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    g2d.drawLine((int)a.x, (int)a.y, (int)b.x, (int)b.y);
+                }
+            }
+        }
+
+        // Draw shapes on top
+        if (boardData.shapes != null) {
+            for (int i = 0; i < shapeCountVisible && i < boardData.shapes.size(); i++) {
+                renderShape(g2d, boardData.shapes.get(i));
+            }
+        }
+
         g2d.dispose();
         return image;
     }
