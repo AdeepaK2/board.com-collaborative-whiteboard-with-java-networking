@@ -86,10 +86,18 @@ public class Server {
     private static void startHttpApiServer() {
         try {
             HttpServer httpServer = HttpServer.create(new InetSocketAddress(HTTP_PORT), 0);
+            
+            // Board API endpoints
             httpServer.createContext("/api/boards", new BoardApiHandler(roomManager));
+            
+            // Authentication API endpoints
+            httpServer.createContext("/api/auth", new AuthApiHandler(messageHandler.getUserDB()));
+            
             httpServer.setExecutor(Executors.newFixedThreadPool(4));
             httpServer.start();
             System.out.println("📡 HTTP API Server started on port " + HTTP_PORT);
+            System.out.println("   - Board API: http://localhost:" + HTTP_PORT + "/api/boards");
+            System.out.println("   - Auth API: http://localhost:" + HTTP_PORT + "/api/auth");
         } catch (IOException e) {
             System.err.println("Failed to start HTTP API server: " + e.getMessage());
         }
