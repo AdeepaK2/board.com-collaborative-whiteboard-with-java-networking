@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import org.example.model.Room;
+import org.example.service.UserDatabaseService;
 
 import java.net.Socket;
 import java.util.*;
@@ -17,10 +18,19 @@ import java.util.*;
 public class MessageHandler {
     private final RoomManager roomManager;
     private final Gson gson;
+    private final UserDatabaseService userDB;
     
     public MessageHandler(RoomManager roomManager) {
         this.roomManager = roomManager;
         this.gson = new Gson();
+        this.userDB = new UserDatabaseService();
+    }
+    
+    /**
+     * Get UserDatabaseService instance for REST API
+     */
+    public UserDatabaseService getUserDB() {
+        return userDB;
     }
     
     /**
