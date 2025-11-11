@@ -1,0 +1,33 @@
+{
+  "boardId": "board-1762708642804-42435da1",
+  "boardName": "board 2",
+  "roomId": "",
+  "shapes": [
+    {
+      "id": "shape-1762708624615-suwfw9rvl",
+      "type": "circle",
+      "x": 350.6666717529297,
+      "y": 301.7777786254883,
+      "radius": 248.76092940813675,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708625732-bazu85s5i",
+      "type": "circle",
+      "x": 695.6666717529297,
+      "y": 324.7777786254883,
+      "radius": 56.08029957123981,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    }
+  ],
+  "strokes": [],
+  "savedBy": "mano",
+  "savedAt": "2025-11-09T22:47:22.8041441",
+  "shapeCount": 2
+}

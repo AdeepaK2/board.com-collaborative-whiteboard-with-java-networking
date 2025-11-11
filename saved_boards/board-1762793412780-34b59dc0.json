@@ -1,0 +1,95 @@
+{
+  "boardId": "board-1762793412780-34b59dc0",
+  "boardName": "testing with room 1",
+  "roomId": "",
+  "shapes": [
+    {
+      "id": "shape-1762793364483-alhihk6js",
+      "type": "rectangle",
+      "x": 160.6666717529297,
+      "y": 156.77777862548828,
+      "width": 286.0,
+      "height": 221.0,
+      "color": "#000000",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762793365571-zwycllpbk",
+      "type": "rectangle",
+      "x": 554.6666717529297,
+      "y": 325.7777786254883,
+      "width": 214.0,
+      "height": 114.0,
+      "color": "#000000",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762793366533-yr0owhz22",
+      "type": "rectangle",
+      "x": 725.6666717529297,
+      "y": 151.77777862548828,
+      "width": 287.0,
+      "height": 97.0,
+      "color": "#000000",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762793367528-7ibckpi8e",
+      "type": "rectangle",
+      "x": 498.6666717529297,
+      "y": 86.77777862548828,
+      "width": 153.0,
+      "height": 81.0,
+      "color": "#000000",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762793370925-io7cu2r12",
+      "type": "triangle",
+      "x": 329.6666717529297,
+      "y": 99.77777862548828,
+      "width": -99.0,
+      "height": 329.0,
+      "color": "#000000",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762793375405-nh5yf5158",
+      "type": "text",
+      "x": 452.6666717529297,
+      "y": 462.7777786254883,
+      "color": "#000000",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762793376816-of2lodhp6",
+      "type": "text",
+      "x": 450.6666717529297,
+      "y": 471.7777786254883,
+      "color": "#000000",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0,
+      "text": "yamak liyanna",
+      "fontSize": 16
+    }
+  ],
+  "strokes": [],
+  "savedBy": "mano",
+  "savedAt": "2025-11-10T22:20:12.7892695",
+  "shapeCount": 7
+}

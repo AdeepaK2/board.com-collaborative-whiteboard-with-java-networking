@@ -8,6 +8,8 @@ import com.sun.net.httpserver.HttpHandler;
 import org.example.model.Room;
 import org.example.server.modules.RoomManager;
 import org.example.service.BoardStorageService;
+import org.example.service.TimelapseJobManager;
+import org.example.service.TimelapseService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +35,7 @@ public class BoardApiHandler implements HttpHandler {
         // Enable CORS
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
         
         if ("OPTIONS".equals(exchange.getRequestMethod())) {
             exchange.sendResponseHeaders(204, -1);
@@ -56,6 +58,12 @@ public class BoardApiHandler implements HttpHandler {
                 handleExportBoard(exchange);
             } else if (path.equals("/api/boards/import") && "POST".equals(method)) {
                 handleImportBoard(exchange);
+            } else if (path.equals("/api/boards/generate-timelapse") && "POST".equals(method)) {
+                handleGenerateTimelapse(exchange);
+            } else if (path.startsWith("/api/boards/timelapse-status/") && "GET".equals(method)) {
+                handleTimelapseStatus(exchange);
+            } else if (path.startsWith("/api/boards/timelapse-video/") && "GET".equals(method)) {
+                handleDownloadTimelapse(exchange);
             } else {
                 sendResponse(exchange, 404, createErrorResponse("Endpoint not found"));
             }
@@ -183,6 +191,106 @@ public class BoardApiHandler implements HttpHandler {
         } else {
             sendResponse(exchange, 500, createErrorResponse(result.message));
         }
+    }
+    
+    /**
+     * Generate timelapse video (async job)
+     * 
+     * NETWORK PRINCIPLE: HTTP 202 Accepted - Asynchronous processing
+     * Returns job ID immediately, client polls for completion
+     */
+    private void handleGenerateTimelapse(HttpExchange exchange) throws IOException {
+        String body = readRequestBody(exchange);
+        JsonObject request = gson.fromJson(body, JsonObject.class);
+        
+        String boardId = request.get("boardId").getAsString();
+        int duration = request.has("duration") ? request.get("duration").getAsInt() : 10;
+        
+        // Start async video generation
+        TimelapseJobManager.TimelapseJob job = TimelapseService.generateTimelapseAsync(boardId, duration);
+        
+        // Return 202 Accepted with job ID
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("jobId", job.jobId);
+        response.put("status", job.status.toString());
+        response.put("message", "Timelapse generation started");
+        
+        sendResponse(exchange, 202, gson.toJson(response));
+    }
+    
+    /**
+     * Get timelapse job status
+     * 
+     * NETWORK PRINCIPLE: Polling pattern for async job status
+     */
+    private void handleTimelapseStatus(HttpExchange exchange) throws IOException {
+        String path = exchange.getRequestURI().getPath();
+        String jobId = path.substring("/api/boards/timelapse-status/".length());
+        
+        TimelapseJobManager.TimelapseJob job = TimelapseJobManager.getJob(jobId);
+        
+        if (job == null) {
+            sendResponse(exchange, 404, createErrorResponse("Job not found"));
+            return;
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("jobId", job.jobId);
+        response.put("status", job.status.toString());
+        response.put("progress", job.progress);
+        response.put("message", job.message);
+        
+        if (job.status == TimelapseJobManager.JobStatus.COMPLETED) {
+            response.put("videoUrl", "/api/boards/timelapse-video/" + job.jobId);
+        }
+        
+        sendResponse(exchange, 200, gson.toJson(response));
+    }
+    
+    /**
+     * Download timelapse video
+     * 
+     * NETWORK PRINCIPLES:
+     * - Binary data transfer (MP4 video)
+     * - Large file streaming
+     * - Content-Type: video/mp4
+     * - Content-Disposition for download
+     */
+    private void handleDownloadTimelapse(HttpExchange exchange) throws IOException {
+        String path = exchange.getRequestURI().getPath();
+        String jobId = path.substring("/api/boards/timelapse-video/".length());
+        
+        TimelapseJobManager.TimelapseJob job = TimelapseJobManager.getJob(jobId);
+        
+        if (job == null || job.status != TimelapseJobManager.JobStatus.COMPLETED) {
+            sendResponse(exchange, 404, createErrorResponse("Video not ready or not found"));
+            return;
+        }
+        
+        java.nio.file.Path videoPath = TimelapseService.getVideoPath(jobId);
+        
+        if (!java.nio.file.Files.exists(videoPath)) {
+            sendResponse(exchange, 404, createErrorResponse("Video file not found"));
+            return;
+        }
+        
+        // Read video file
+        byte[] videoData = java.nio.file.Files.readAllBytes(videoPath);
+        
+        // Set video content type and headers
+        exchange.getResponseHeaders().set("Content-Type", "video/mp4");
+        exchange.getResponseHeaders().set("Content-Disposition", 
+            "attachment; filename=\"timelapse-" + jobId + ".mp4\"");
+        
+        // Send binary video data
+        exchange.sendResponseHeaders(200, videoData.length);
+        OutputStream os = exchange.getResponseBody();
+        os.write(videoData);
+        os.close();
+        
+        System.out.println("📹 Sent timelapse video: " + jobId + " (" + videoData.length + " bytes)");
     }
     
     // Helper methods

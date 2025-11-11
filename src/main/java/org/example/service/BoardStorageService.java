@@ -9,14 +9,25 @@ import org.example.model.ShapeData;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.CompletionHandler;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
- * Service for persisting and loading whiteboard states
+ * Service for persisting and loading whiteboard states using NIO (Non-blocking I/O)
+ * 
+ * NETWORK PROGRAMMING PRINCIPLE: Java NIO (Non-blocking I/O)
+ * - Uses AsynchronousFileChannel for non-blocking file operations
+ * - CompletionHandler callbacks for async read/write completion
+ * - Allows server to handle other requests while file I/O is in progress
  */
 public class BoardStorageService {
     private static final String BOARDS_DIR = "saved_boards";
@@ -34,7 +45,7 @@ public class BoardStorageService {
     }
     
     /**
-     * Save a board state
+     * Save a board state using NIO async file I/O
      */
     public static SaveResult saveBoard(String boardName, Room room, String username) {
         try {
@@ -51,11 +62,13 @@ public class BoardStorageService {
             boardData.savedAt = timestamp;
             boardData.shapeCount = boardData.shapes.size();
             
-            // Save to file
+            // Save to file using async NIO
             String filename = boardId + ".json";
             Path filepath = Paths.get(BOARDS_DIR, filename);
             String json = gson.toJson(boardData);
-            Files.writeString(filepath, json);
+            
+            // Non-blocking async write - wait for completion
+            writeFileAsync(filepath, json).get();
             
             // Update registry
             BoardMetadata metadata = new BoardMetadata();
@@ -70,13 +83,13 @@ public class BoardStorageService {
             saveBoardRegistry();
             
             return new SaveResult(true, boardId, "Board saved successfully");
-        } catch (IOException e) {
+        } catch (InterruptedException | ExecutionException e) {
             return new SaveResult(false, null, "Failed to save board: " + e.getMessage());
         }
     }
     
     /**
-     * Save a board state with shapes and strokes from JSON
+     * Save a board state with shapes and strokes from JSON using NIO async I/O
      */
     public static SaveResult saveBoard(String boardName, JsonArray shapesJson, JsonArray strokesJson, String username) {
         try {
@@ -100,11 +113,13 @@ public class BoardStorageService {
             boardData.savedAt = timestamp;
             boardData.shapeCount = boardData.shapes.size();
             
-            // Save to file
+            // Save to file using async NIO
             String filename = boardId + ".json";
             Path filepath = Paths.get(BOARDS_DIR, filename);
             String json = gson.toJson(boardData);
-            Files.writeString(filepath, json);
+            
+            // Non-blocking async write - wait for completion
+            writeFileAsync(filepath, json).get();
             
             // Update registry
             BoardMetadata metadata = new BoardMetadata();
@@ -119,13 +134,13 @@ public class BoardStorageService {
             saveBoardRegistry();
             
             return new SaveResult(true, boardId, "Board saved successfully");
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             return new SaveResult(false, null, "Failed to save board: " + e.getMessage());
         }
     }
     
     /**
-     * Load a board state
+     * Load a board state using NIO async file I/O
      */
     public static BoardData loadBoard(String boardId) throws IOException {
         BoardMetadata metadata = boardRegistry.get(boardId);
@@ -138,8 +153,13 @@ public class BoardStorageService {
             throw new IOException("Board file not found: " + metadata.filename);
         }
         
-        String json = Files.readString(filepath);
-        return gson.fromJson(json, BoardData.class);
+        try {
+            // Non-blocking async read - wait for completion
+            String json = readFileAsync(filepath).get();
+            return gson.fromJson(json, BoardData.class);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IOException("Failed to load board: " + e.getMessage(), e);
+        }
     }
     
     /**
@@ -180,7 +200,7 @@ public class BoardStorageService {
     }
     
     /**
-     * Import board from JSON string
+     * Import board from JSON string using NIO async I/O
      */
     public static SaveResult importBoard(String boardName, String jsonData, String username) {
         try {
@@ -193,7 +213,9 @@ public class BoardStorageService {
             String filename = data.boardId + ".json";
             Path filepath = Paths.get(BOARDS_DIR, filename);
             String json = gson.toJson(data);
-            Files.writeString(filepath, json);
+            
+            // Non-blocking async write
+            writeFileAsync(filepath, json).get();
             
             BoardMetadata metadata = new BoardMetadata();
             metadata.boardId = data.boardId;
@@ -207,7 +229,7 @@ public class BoardStorageService {
             saveBoardRegistry();
             
             return new SaveResult(true, data.boardId, "Board imported successfully");
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             return new SaveResult(false, null, "Failed to import board: " + e.getMessage());
         }
     }
@@ -216,6 +238,113 @@ public class BoardStorageService {
     
     private static String generateBoardId() {
         return "board-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+    
+    /**
+     * Asynchronously write data to file using NIO
+     * 
+     * NIO PRINCIPLE: Non-blocking asynchronous file write
+     * - Uses AsynchronousFileChannel instead of blocking Files.writeString()
+     * - CompletionHandler callback executes when write completes
+     * - Thread can continue processing other requests during I/O
+     */
+    private static CompletableFuture<Void> writeFileAsync(Path filepath, String content) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        
+        try {
+            // Open asynchronous file channel for writing
+            AsynchronousFileChannel channel = AsynchronousFileChannel.open(
+                filepath,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.WRITE,
+                StandardOpenOption.TRUNCATE_EXISTING
+            );
+            
+            ByteBuffer buffer = ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8));
+            
+            // Asynchronous write with callback handler
+            channel.write(buffer, 0, buffer, new CompletionHandler<Integer, ByteBuffer>() {
+                @Override
+                public void completed(Integer result, ByteBuffer attachment) {
+                    try {
+                        channel.close();
+                        future.complete(null);
+                        System.out.println("✓ Async write completed: " + filepath.getFileName());
+                    } catch (IOException e) {
+                        future.completeExceptionally(e);
+                    }
+                }
+                
+                @Override
+                public void failed(Throwable exc, ByteBuffer attachment) {
+                    try {
+                        channel.close();
+                    } catch (IOException e) {
+                        System.err.println("Error closing write channel: " + e.getMessage());
+                    }
+                    future.completeExceptionally(exc);
+                }
+            });
+            
+        } catch (IOException e) {
+            future.completeExceptionally(e);
+        }
+        
+        return future;
+    }
+    
+    /**
+     * Asynchronously read data from file using NIO
+     * 
+     * NIO PRINCIPLE: Non-blocking asynchronous file read
+     * - Uses AsynchronousFileChannel for non-blocking reads
+     * - Returns CompletableFuture that resolves when read completes
+     * - Allows concurrent file reads without thread blocking
+     */
+    private static CompletableFuture<String> readFileAsync(Path filepath) {
+        CompletableFuture<String> future = new CompletableFuture<>();
+        
+        try {
+            // Open asynchronous file channel for reading
+            AsynchronousFileChannel channel = AsynchronousFileChannel.open(
+                filepath,
+                StandardOpenOption.READ
+            );
+            
+            long fileSize = Files.size(filepath);
+            ByteBuffer buffer = ByteBuffer.allocate((int) fileSize);
+            
+            // Asynchronous read with callback handler
+            channel.read(buffer, 0, buffer, new CompletionHandler<Integer, ByteBuffer>() {
+                @Override
+                public void completed(Integer result, ByteBuffer attachment) {
+                    try {
+                        channel.close();
+                        attachment.flip();
+                        String content = StandardCharsets.UTF_8.decode(attachment).toString();
+                        future.complete(content);
+                        System.out.println("✓ Async read completed: " + filepath.getFileName());
+                    } catch (IOException e) {
+                        future.completeExceptionally(e);
+                    }
+                }
+                
+                @Override
+                public void failed(Throwable exc, ByteBuffer attachment) {
+                    try {
+                        channel.close();
+                    } catch (IOException e) {
+                        System.err.println("Error closing read channel: " + e.getMessage());
+                    }
+                    future.completeExceptionally(exc);
+                }
+            });
+            
+        } catch (IOException e) {
+            future.completeExceptionally(e);
+        }
+        
+        return future;
     }
     
     private static void loadBoardRegistry() {

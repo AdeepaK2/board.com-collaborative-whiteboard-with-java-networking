@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import org.example.model.Room;
+import org.example.model.ShapeData;
 import org.example.service.UserDatabaseService;
 
 import java.net.Socket;
@@ -372,11 +373,27 @@ public class MessageHandler {
         
         Room room = roomManager.getRoom(roomId);
         if (room != null) {
-            // Store shape in room history
-            room.addToDrawingHistory(message);
-            
-            // Broadcast to all users in the room
-            return MessageResult.broadcastToRoom(message, roomId);
+            try {
+                // Parse the message to extract shape ID
+                JsonObject json = gson.fromJson(message, JsonObject.class);
+                String shapeId = json.get("shapeId").getAsString();
+                
+                // Store shape data in room's shape map
+                JsonObject shapeObj = json.getAsJsonObject("shape");
+                ShapeData shapeData = gson.fromJson(shapeObj, ShapeData.class);
+                room.addShape(shapeId, shapeData);
+                
+                // Also store in drawing history
+                room.addToDrawingHistory(message);
+                
+                // Broadcast to all users in the room
+                return MessageResult.broadcastToRoom(message, roomId);
+            } catch (Exception e) {
+                System.err.println("Error parsing addShape message: " + e.getMessage());
+                // Still broadcast even if parsing fails
+                room.addToDrawingHistory(message);
+                return MessageResult.broadcastToRoom(message, roomId);
+            }
         }
         
         return MessageResult.noAction();
@@ -413,8 +430,37 @@ public class MessageHandler {
         
         Room room = roomManager.getRoom(roomId);
         if (room != null) {
-            // Broadcast shape deletion to all users
-            return MessageResult.broadcastToRoom(message, roomId);
+            try {
+                // Parse the message to extract shape ID
+                JsonObject json = gson.fromJson(message, JsonObject.class);
+                String shapeId = json.get("shapeId").getAsString();
+                
+                // Remove shape from room's shape map
+                room.removeShape(shapeId);
+                
+                // Remove shape from drawing history
+                List<String> history = room.getDrawingHistory();
+                history.removeIf(msg -> {
+                    try {
+                        JsonObject msgJson = gson.fromJson(msg, JsonObject.class);
+                        String msgType = msgJson.get("type").getAsString();
+                        if (msgType.equals("addShape")) {
+                            String msgShapeId = msgJson.get("shapeId").getAsString();
+                            return msgShapeId.equals(shapeId);
+                        }
+                    } catch (Exception e) {
+                        // Ignore parsing errors
+                    }
+                    return false;
+                });
+                
+                // Broadcast shape deletion to all users
+                return MessageResult.broadcastToRoom(message, roomId);
+            } catch (Exception e) {
+                System.err.println("Error deleting shape: " + e.getMessage());
+                // Still broadcast the deletion message
+                return MessageResult.broadcastToRoom(message, roomId);
+            }
         }
         
         return MessageResult.noAction();
