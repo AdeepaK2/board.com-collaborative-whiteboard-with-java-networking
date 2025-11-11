@@ -1,0 +1,468 @@
+{
+  "boardId": "board-1762711002225-2e063052",
+  "boardName": "sdsddsd",
+  "roomId": "",
+  "shapes": [
+    {
+      "id": "shape-1762710815465-h0tjr8mdm",
+      "type": "rectangle",
+      "x": 321.6666717529297,
+      "y": 69.77777862548828,
+      "width": 261.0,
+      "height": 108.0,
+      "color": "#000000",
+      "size": 3,
+      "fillColor": "#000000",
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710816325-w3k3iojye",
+      "type": "rectangle",
+      "x": 424.6666717529297,
+      "y": 294.7777786254883,
+      "width": 254.0,
+      "height": 104.0,
+      "color": "#000000",
+      "size": 3,
+      "fillColor": "#000000",
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710817212-qru6ap30d",
+      "type": "rectangle",
+      "x": 742.6666717529297,
+      "y": 275.7777786254883,
+      "width": 214.0,
+      "height": 46.0,
+      "color": "#000000",
+      "size": 3,
+      "fillColor": "#3c5f35",
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710820456-knc5iizrv",
+      "type": "circle",
+      "x": 126.66667175292969,
+      "y": 248.77777862548828,
+      "radius": 176.2980430974774,
+      "color": "#000000",
+      "size": 3,
+      "fillColor": "#3c5f35",
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710821166-cka5t0gjy",
+      "type": "circle",
+      "x": 210.6666717529297,
+      "y": 403.7777786254883,
+      "radius": 119.6202324023825,
+      "color": "#000000",
+      "size": 3,
+      "fillColor": "#3c5f35",
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710821954-lhez6t9e2",
+      "type": "circle",
+      "x": 429.6666717529297,
+      "y": 529.7777786254883,
+      "radius": 161.01242188104618,
+      "color": "#000000",
+      "size": 3,
+      "fillColor": "#3c5f35",
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710823571-7xzqfsohp",
+      "type": "circle",
+      "x": 236.6666717529297,
+      "y": 166.77777862548828,
+      "radius": 0.0,
+      "color": "#000000",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710835743-v413h7zxv",
+      "type": "text",
+      "x": 672.6666717529297,
+      "y": 76.77777862548828,
+      "color": "#3c5f35",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710836515-v9810lfjr",
+      "type": "text",
+      "x": 672.6666717529297,
+      "y": 76.77777862548828,
+      "color": "#3c5f35",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "hello this is manodi testing the timelaps timetttssdddddddddddsssssdseeeesaaaadddm,;smad;lmsssss",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710849102-w3orokogc",
+      "type": "triangle",
+      "x": 546.6666717529297,
+      "y": 217.77777862548828,
+      "width": -260.0,
+      "height": 185.0,
+      "color": "#3c5f35",
+      "size": 3,
+      "fillColor": "#da2316",
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710852704-g4lf4n4ny",
+      "type": "triangle",
+      "x": 446.6666717529297,
+      "y": 302.7777786254883,
+      "width": 0.0,
+      "height": 0.0,
+      "color": "#5f3835",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710865354-dpgmp894p",
+      "type": "line",
+      "x": 38.66667175292969,
+      "y": 516.7777786254883,
+      "endX": 850.6666717529297,
+      "endY": 157.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710866937-aecjnzhbq",
+      "type": "line",
+      "x": 666.6666717529297,
+      "y": 152.77777862548828,
+      "endX": 887.6666717529297,
+      "endY": 582.7777786254883,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710868123-ijn9g8vth",
+      "type": "line",
+      "x": 710.6666717529297,
+      "y": 542.7777786254883,
+      "endX": 942.6666717529297,
+      "endY": 113.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710883043-l80igcb7x",
+      "type": "line",
+      "x": 995.6666717529297,
+      "y": 113.77777862548828,
+      "endX": 995.6666717529297,
+      "endY": 113.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710886386-r50jhx4yn",
+      "type": "circle",
+      "x": 300.6666717529297,
+      "y": 21.77777862548828,
+      "radius": 93.49331526906082,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762710986512-na4fp5og4",
+      "type": "text",
+      "x": 850.6666717529297,
+      "y": 89.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710986718-256zx4nxe",
+      "type": "text",
+      "x": 850.6666717529297,
+      "y": 89.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710986906-iibumhb38",
+      "type": "text",
+      "x": 850.6666717529297,
+      "y": 89.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710987513-vasdit7n7",
+      "type": "text",
+      "x": 926.6666717529297,
+      "y": 66.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710987713-nshoy5fop",
+      "type": "text",
+      "x": 926.6666717529297,
+      "y": 66.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710988444-dftbmxbyb",
+      "type": "text",
+      "x": 953.6666717529297,
+      "y": 57.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710988646-wqhiundk3",
+      "type": "text",
+      "x": 953.6666717529297,
+      "y": 57.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710989362-mlvc9xxmg",
+      "type": "text",
+      "x": 1028.6666717529297,
+      "y": 55.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710989999-n2es7w49b",
+      "type": "text",
+      "x": 1032.6666717529297,
+      "y": 191.77777862548828,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710990850-96h7q1vui",
+      "type": "text",
+      "x": 902.6666717529297,
+      "y": 271.7777786254883,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0,
+      "text": "",
+      "fontSize": 16
+    },
+    {
+      "id": "shape-1762710996150-idekobch0",
+      "type": "rectangle",
+      "x": 398.6666717529297,
+      "y": 84.77777862548828,
+      "width": 136.0,
+      "height": 86.0,
+      "color": "#da2316",
+      "size": 3,
+      "username": "manodi",
+      "timestamp": 0
+    }
+  ],
+  "strokes": [
+    {
+      "points": [
+        {
+          "x": 133.6666717529297,
+          "y": 124.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 133.6666717529297,
+          "y": 124.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 148.6666717529297,
+          "y": 130.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 148.6666717529297,
+          "y": 130.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 178.6666717529297,
+          "y": 144.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 178.6666717529297,
+          "y": 144.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 232.6666717529297,
+          "y": 163.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 232.6666717529297,
+          "y": 163.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 259.6666717529297,
+          "y": 175.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 259.6666717529297,
+          "y": 175.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 285.6666717529297,
+          "y": 187.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 285.6666717529297,
+          "y": 187.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 306.6666717529297,
+          "y": 200.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 306.6666717529297,
+          "y": 200.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 314.6666717529297,
+          "y": 204.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 314.6666717529297,
+          "y": 204.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 317.6666717529297,
+          "y": 206.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 317.6666717529297,
+          "y": 206.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 321.6666717529297,
+          "y": 208.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 321.6666717529297,
+          "y": 208.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        },
+        {
+          "x": 324.6666717529297,
+          "y": 209.77777862548828,
+          "color": "#000000",
+          "size": 3.0
+        }
+      ]
+    }
+  ],
+  "savedBy": "manodi",
+  "savedAt": "2025-11-09T23:26:42.2308847",
+  "shapeCount": 27
+}

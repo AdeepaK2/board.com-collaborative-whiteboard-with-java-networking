@@ -1,0 +1,129 @@
+{
+  "boardId": "board-1762708692048-9b2c3076",
+  "boardName": "board 3",
+  "roomId": "",
+  "shapes": [
+    {
+      "id": "shape-1762708577028-hij33l56p",
+      "type": "rectangle",
+      "x": 168.6666717529297,
+      "y": 175.77777862548828,
+      "width": 118.0,
+      "height": 408.0,
+      "color": "#000000",
+      "size": 3,
+      "fillColor": "#8e2525",
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708591773-cqmtv3wei",
+      "type": "triangle",
+      "x": 309.6666717529297,
+      "y": 70.77777862548828,
+      "width": 358.0,
+      "height": 148.0,
+      "color": "#8e2525",
+      "size": 3,
+      "fillColor": "#3b8e25",
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708594958-2esa3lnwn",
+      "type": "triangle",
+      "x": 556.6666717529297,
+      "y": 157.77777862548828,
+      "width": 0.0,
+      "height": 0.0,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708658762-fzipu7blj",
+      "type": "circle",
+      "x": 807.6666717529297,
+      "y": 204.77777862548828,
+      "radius": 347.2419905483782,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708663660-yhi1pciiz",
+      "type": "circle",
+      "x": 874.6666717529297,
+      "y": 287.7777786254883,
+      "radius": 206.196508214858,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708664419-opi38t8f6",
+      "type": "circle",
+      "x": 688.6666717529297,
+      "y": 376.7777786254883,
+      "radius": 65.11528238439882,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708669458-lhh7d6tu2",
+      "type": "circle",
+      "x": 432.6666717529297,
+      "y": 11.777778625488281,
+      "radius": 0.0,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708682815-i6lgzfymn",
+      "type": "line",
+      "x": 258.6666717529297,
+      "y": 15.777778625488281,
+      "endX": 363.6666717529297,
+      "endY": 200.77777862548828,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708683652-b3vkkvj8i",
+      "type": "line",
+      "x": 363.6666717529297,
+      "y": 200.77777862548828,
+      "endX": 392.6666717529297,
+      "endY": 369.7777786254883,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    },
+    {
+      "id": "shape-1762708684297-7hgj2l3lv",
+      "type": "line",
+      "x": 392.6666717529297,
+      "y": 369.7777786254883,
+      "endX": 270.6666717529297,
+      "endY": 438.7777786254883,
+      "color": "#3b8e25",
+      "size": 3,
+      "username": "mano",
+      "timestamp": 0
+    }
+  ],
+  "strokes": [],
+  "savedBy": "mano",
+  "savedAt": "2025-11-09T22:48:12.0480219",
+  "shapeCount": 10
+}
