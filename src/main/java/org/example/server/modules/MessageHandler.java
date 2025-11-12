@@ -33,6 +33,8 @@ public class MessageHandler {
     public UserDatabaseService getUserDB() {
         return userDB;
     }
+
+    
     
     /**
      * Process incoming message and return response
@@ -80,6 +82,10 @@ public class MessageHandler {
                     
                 case "leaveRoom":
                     return handleLeaveRoom(sender, clients, clientRooms);
+
+                case "chatMessage":
+                    return handleChatMessage(sender, json, clients, clientRooms);
+
                     
                 default:
                     System.out.println("Unknown message type: " + type);
@@ -399,6 +405,8 @@ public class MessageHandler {
         return MessageResult.noAction();
     }
     
+
+
     /**
      * Handle updating a shape (move, resize, fill)
      */
@@ -533,5 +541,66 @@ public class MessageHandler {
             error.addProperty("message", errorMessage);
             return new MessageResult(Action.ERROR, error.toString(), null, null, null, null);
         }
+    }
+
+
+
+    
+
+    //Rasmiya/Chat
+    private MessageResult handleChatMessage(Socket sender, JsonObject json,
+                                            Map<Socket, String> clients,
+                                            Map<Socket, String> clientRooms) {
+        try {
+            // Use server-side mapping to determine room and username to prevent mismatches
+            String roomId = clientRooms.get(sender);
+            if (roomId == null) {
+                return MessageResult.error("Not in a room");
+            }
+
+            String username = clients.get(sender);
+            if ((username == null || username.isEmpty()) && json.has("username")) {
+                // Fallback to client-supplied username only if server doesn't have one
+                username = json.get("username").getAsString();
+            }
+
+            String text = json.has("message") ? json.get("message").getAsString() : "";
+
+            // Create JSON for broadcasting
+            JsonObject chatJson = new JsonObject();
+            chatJson.addProperty("type", "chatMessage");
+            chatJson.addProperty("username", username != null ? username : "");
+            chatJson.addProperty("message", text);
+            chatJson.addProperty("timestamp", System.currentTimeMillis());
+
+            // Optionally add to room's chat history (uncomment to persist)
+            Room room = roomManager.getRoom(roomId);
+            if (room != null) {
+                room.addToChatHistory(chatJson.toString());
+            }
+
+            System.out.println("💬 Chat from " + username + " in room " + roomId + ": " + text);
+
+            // Broadcast to all clients in room
+            return MessageResult.broadcastToRoom(chatJson.toString(), roomId);
+        } catch (Exception e) {
+            System.err.println("Error handling chat message: " + e.getMessage());
+            e.printStackTrace();
+            return MessageResult.error("Invalid chat message");
+        }
+    }
+
+    /**
+     * Get all clients currently connected to a specific room
+     * Used by server to determine message recipients
+     */
+    public List<Socket> getClientsInRoom(String roomId, Map<Socket, String> clientRooms) {
+        List<Socket> roomClients = new ArrayList<>();
+        for (Map.Entry<Socket, String> entry : clientRooms.entrySet()) {
+            if (roomId.equals(entry.getValue())) {
+                roomClients.add(entry.getKey());
+            }
+        }
+        return roomClients;
     }
 }

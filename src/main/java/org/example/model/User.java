@@ -36,6 +36,14 @@ public class User implements Serializable {
     
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+
+    //FOR CHAT
+    private long lastMessageTime;
+
+    public long getLastMessageTime() { return lastMessageTime; }
+    public void setLastMessageTime(long lastMessageTime) { this.lastMessageTime = lastMessageTime; }
+
     
     @Override
     public boolean equals(Object obj) {

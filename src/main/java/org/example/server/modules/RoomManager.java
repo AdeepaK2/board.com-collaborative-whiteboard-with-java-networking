@@ -102,6 +102,8 @@ public class RoomManager {
             return;
         }
         
+
+        
         List<String> emptyRoomIds = new ArrayList<>();
         for (Map.Entry<String, Room> entry : rooms.entrySet()) {
             if (entry.getValue().isEmpty()) {

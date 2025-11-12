@@ -20,13 +20,18 @@ public class Room implements Serializable {
     private int maxParticipants;
     private boolean isPublic;
     private String password; // Password for private rooms (null if no password)
+
+    
     private Set<String> invitedUsers; // List of users invited to private room
+
+    private List<String> chatHistory;
     
     public Room() {
         this.createdTime = System.currentTimeMillis();
         this.participants = ConcurrentHashMap.newKeySet();
         this.drawingHistory = Collections.synchronizedList(new ArrayList<>());
         this.shapes = new ConcurrentHashMap<>();
+        this.chatHistory = Collections.synchronizedList(new ArrayList<>()); // ✅ initialized
         this.maxParticipants = 50;
         this.isPublic = true;
         this.password = null;
@@ -78,6 +83,8 @@ public class Room implements Serializable {
         drawingHistory.clear();
         shapes.clear();
     }
+
+    
     
     public Map<String, ShapeData> getShapes() { return new HashMap<>(shapes); }
     public void addShape(String shapeId, ShapeData shape) { shapes.put(shapeId, shape); }
@@ -106,6 +113,17 @@ public class Room implements Serializable {
     public void addInvitedUser(String username) { invitedUsers.add(username); }
     public void removeInvitedUser(String username) { invitedUsers.remove(username); }
     public boolean isUserInvited(String username) { return invitedUsers.contains(username); }
+
+
+    // ---------- NEW: Chat history getters and add method ----------
+    public List<String> getChatHistory() {
+        return new ArrayList<>(chatHistory);
+    }
+
+    public void addToChatHistory(String message) {
+        chatHistory.add(message);
+    }
+
 
     @Override
     public boolean equals(Object obj) {

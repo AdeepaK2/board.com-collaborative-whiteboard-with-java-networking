@@ -303,11 +303,16 @@ public class Server {
      * Broadcast message to all clients in a room
      */
     private static void broadcastToRoom(String roomId, String message, Socket excludeSocket) {
+        int count = 0;
         for (Map.Entry<Socket, String> entry : clientRooms.entrySet()) {
-            if (entry.getValue().equals(roomId) && entry.getKey() != excludeSocket) {
-                sendMessage(entry.getKey(), message);
+            Socket clientSocket = entry.getKey();
+            String clientRoomId = entry.getValue();
+            if (clientRoomId.equals(roomId) && clientSocket != excludeSocket) {
+                sendMessage(clientSocket, message);
+                count++;
             }
         }
+        System.out.println("[Broadcast] Sent message to room '" + roomId + "' to " + count + " clients. Message: " + message);
     }
 
     /**
