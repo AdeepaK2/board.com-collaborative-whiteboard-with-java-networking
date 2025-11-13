@@ -58,6 +58,7 @@ public class BoardStorageService {
             boardData.roomId = room.getRoomId();
             boardData.shapes = new ArrayList<>(room.getShapes().values());
             boardData.strokes = new ArrayList<>(); // Empty for now
+            boardData.eraserStrokes = new ArrayList<>(); // Empty for now
             boardData.savedBy = username;
             boardData.savedAt = timestamp;
             boardData.shapeCount = boardData.shapes.size();
@@ -91,7 +92,7 @@ public class BoardStorageService {
     /**
      * Save a board state with shapes and strokes from JSON using NIO async I/O
      */
-    public static SaveResult saveBoard(String boardName, JsonArray shapesJson, JsonArray strokesJson, String username) {
+    public static SaveResult saveBoard(String boardName, JsonArray shapesJson, JsonArray strokesJson, JsonArray eraserStrokesJson, String username) {
         try {
             String boardId = generateBoardId();
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -108,6 +109,9 @@ public class BoardStorageService {
             // Parse strokes
             Type strokesType = new TypeToken<List<StrokeData>>(){}.getType();
             boardData.strokes = strokesJson != null ? gson.fromJson(strokesJson, strokesType) : new ArrayList<>();
+            
+            // Parse eraser strokes
+            boardData.eraserStrokes = eraserStrokesJson != null ? gson.fromJson(eraserStrokesJson, strokesType) : new ArrayList<>();
             
             boardData.savedBy = username;
             boardData.savedAt = timestamp;
@@ -383,6 +387,7 @@ public class BoardStorageService {
         public String roomId;
         public List<ShapeData> shapes;
         public List<StrokeData> strokes;
+        public List<StrokeData> eraserStrokes;
         public String savedBy;
         public String savedAt;
         public int shapeCount;

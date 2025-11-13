@@ -1,16 +1,6 @@
 package org.example.server;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import org.example.model.Room;
-import org.example.server.modules.RoomManager;
-import org.example.service.BoardStorageService;
-import org.example.service.TimelapseJobManager;
-import org.example.service.TimelapseService;
-
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -22,10 +12,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import org.example.server.Server;
+
 import org.example.model.Room;
+import org.example.server.modules.RoomManager;
+import org.example.service.BoardStorageService;
+import org.example.service.TimelapseJobManager;
+import org.example.service.TimelapseService;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 /**
  * HTTP API handler for board save/load operations
@@ -103,15 +103,16 @@ public class BoardApiHandler implements HttpHandler {
         String roomId = request.get("roomId").getAsString();
         String username = request.get("username").getAsString();
         
-        // Get shapes and strokes from request if provided, otherwise fall back to room data
+        // Get shapes, strokes, and eraserStrokes from request if provided, otherwise fall back to room data
         JsonArray shapesJson = request.has("shapes") ? request.getAsJsonArray("shapes") : null;
         JsonArray strokesJson = request.has("strokes") ? request.getAsJsonArray("strokes") : null;
+        JsonArray eraserStrokesJson = request.has("eraserStrokes") ? request.getAsJsonArray("eraserStrokes") : null;
         
         BoardStorageService.SaveResult result;
         
-        if (shapesJson != null || strokesJson != null) {
-            // Save with provided shapes and strokes
-            result = BoardStorageService.saveBoard(boardName, shapesJson, strokesJson, username);
+        if (shapesJson != null || strokesJson != null || eraserStrokesJson != null) {
+            // Save with provided shapes, strokes, and eraserStrokes
+            result = BoardStorageService.saveBoard(boardName, shapesJson, strokesJson, eraserStrokesJson, username);
         } else {
             // Fallback to room data
             Room room = roomManager.getRoom(roomId);
