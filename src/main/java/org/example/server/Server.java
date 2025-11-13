@@ -3,6 +3,7 @@ package org.example.server;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpServer;
 import org.example.model.Room;
+import org.example.server.modules.ChatHandler;
 import org.example.server.modules.MessageHandler;
 import org.example.server.modules.MessageHandler.MessageResult;
 import org.example.server.modules.RoomManager;
@@ -42,6 +43,7 @@ public class Server {
     // Feature modules
     private static final RoomManager roomManager = new RoomManager();
     private static final MessageHandler messageHandler = new MessageHandler(roomManager);
+    private static final ChatHandler chatHandler = new ChatHandler();
     
     private static volatile boolean running = true;
 
@@ -328,13 +330,23 @@ public class Server {
                     String message = WebSocketHandler.decodeWebSocketFrame(buffer, bytesRead);
                     
                     if (message != null && !message.isEmpty()) {
-                        // Process message using MessageHandler
-                        MessageResult result = messageHandler.handleMessage(
-                            clientSocket, message, clients, clientRooms
-                        );
-                        
-                        // Execute result action
-                        executeMessageResult(clientSocket, result);
+                        // Check if it's a chat message
+                        if (message.contains("\"type\":\"chatMessage\"") || 
+                            message.contains("\"type\":\"getChatHistory\"")) {
+                            // Process chat message using ChatHandler
+                            ChatHandler.ChatMessageResult chatResult = chatHandler.handleChatMessage(
+                                clientSocket, message, clients, clientRooms
+                            );
+                            executeChatMessageResult(clientSocket, chatResult);
+                        } else {
+                            // Process regular message using MessageHandler
+                            MessageResult result = messageHandler.handleMessage(
+                                clientSocket, message, clients, clientRooms
+                            );
+                            
+                            // Execute result action
+                            executeMessageResult(clientSocket, result);
+                        }
                     }
                 }
             }
@@ -370,6 +382,14 @@ public class Server {
                 // Notify others in room
                 if (result.broadcastMessage != null) {
                     broadcastToRoom(result.roomId, result.broadcastMessage, sender);
+                }
+                
+                // Add chat notification for user joined
+                if (result.roomId != null) {
+                    String username = clients.get(sender);
+                    if (username != null) {
+                        chatHandler.addUserJoinedNotification(result.roomId, username);
+                    }
                 }
 
                 // Broadcast updated room list
@@ -425,6 +445,29 @@ public class Server {
     }
 
     /**
+     * Execute the result of chat message processing
+     */
+    private static void executeChatMessageResult(Socket sender, ChatHandler.ChatMessageResult result) {
+        switch (result.action) {
+            case SEND_TO_SENDER:
+                sendMessage(sender, result.message);
+                break;
+
+            case BROADCAST_TO_ROOM:
+                broadcastToRoom(result.roomId, result.message, null);
+                break;
+
+            case ERROR:
+                sendMessage(sender, result.message);
+                break;
+
+            case NO_ACTION:
+            default:
+                break;
+        }
+    }
+
+    /**
      * Clean up when client disconnects
      */
     private static void cleanupClient(Socket clientSocket) {
@@ -436,6 +479,9 @@ public class Server {
             if (room != null) {
                 room.removeParticipant(username);
                 System.out.println("👋 " + username + " left room: " + room.getRoomName());
+                
+                // Add chat notification for user left
+                chatHandler.addUserLeftNotification(roomId, username);
                 
                 // Notify other users in the room
                 JsonObject leaveMessage = new JsonObject();
