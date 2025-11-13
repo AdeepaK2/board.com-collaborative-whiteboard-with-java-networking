@@ -173,15 +173,37 @@ public class BoardApiHandler implements HttpHandler {
         }
         String boardId = path.substring("/delete/".length());
         
-        boolean success = BoardStorageService.deleteBoard(boardId);
+        // Get username from query parameter or request body
+        String query = exchange.getRequestURI().getQuery();
+        String username = null;
+        if (query != null) {
+            String[] params = query.split("&");
+            for (String param : params) {
+                String[] keyValue = param.split("=");
+                if (keyValue.length == 2 && "username".equals(keyValue[0])) {
+                    username = java.net.URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                    break;
+                }
+            }
+        }
         
-        if (success) {
+        if (username == null || username.isEmpty()) {
+            sendResponse(exchange, 400, createErrorResponse("Username is required"));
+            return;
+        }
+        
+        // Check if user is authorized to delete this board
+        BoardStorageService.DeleteResult result = BoardStorageService.deleteBoard(boardId, username);
+        
+        if (result.success) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("message", "Board deleted successfully");
+            response.put("message", result.message);
             sendResponse(exchange, 200, gson.toJson(response));
+        } else if (result.message.contains("not authorized")) {
+            sendResponse(exchange, 403, createErrorResponse(result.message));
         } else {
-            sendResponse(exchange, 404, createErrorResponse("Board not found or failed to delete"));
+            sendResponse(exchange, 404, createErrorResponse(result.message));
         }
     }
     

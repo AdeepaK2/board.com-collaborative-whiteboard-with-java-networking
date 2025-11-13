@@ -174,13 +174,18 @@ public class BoardStorageService {
     }
     
     /**
-     * Delete a saved board
+     * Delete a saved board (only if user is the creator)
      */
-    public static boolean deleteBoard(String boardId) {
+    public static DeleteResult deleteBoard(String boardId, String username) {
         try {
             BoardMetadata metadata = boardRegistry.get(boardId);
             if (metadata == null) {
-                return false;
+                return new DeleteResult(false, "Board not found");
+            }
+            
+            // Check if user is authorized to delete (must be the creator)
+            if (!metadata.savedBy.equals(username)) {
+                return new DeleteResult(false, "You are not authorized to delete this board. Only the creator (" + metadata.savedBy + ") can delete it.");
             }
             
             Path filepath = Paths.get(BOARDS_DIR, metadata.filename);
@@ -188,10 +193,10 @@ public class BoardStorageService {
             boardRegistry.remove(boardId);
             saveBoardRegistry();
             
-            return true;
+            return new DeleteResult(true, "Board deleted successfully");
         } catch (IOException e) {
             System.err.println("Failed to delete board: " + e.getMessage());
-            return false;
+            return new DeleteResult(false, "Failed to delete board: " + e.getMessage());
         }
     }
     
@@ -421,6 +426,16 @@ public class BoardStorageService {
         public SaveResult(boolean success, String boardId, String message) {
             this.success = success;
             this.boardId = boardId;
+            this.message = message;
+        }
+    }
+    
+    public static class DeleteResult {
+        public boolean success;
+        public String message;
+        
+        public DeleteResult(boolean success, String message) {
+            this.success = success;
             this.message = message;
         }
     }
