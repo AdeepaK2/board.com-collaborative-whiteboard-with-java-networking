@@ -25,6 +25,7 @@ public class ShapeData implements Serializable {
     private long timestamp;
     private String text; // For text type
     private Integer fontSize; // For text type
+    private String url; // For image type
 
     public ShapeData() {}
 
@@ -87,6 +88,9 @@ public class ShapeData implements Serializable {
 
     public Integer getFontSize() { return fontSize; }
     public void setFontSize(Integer fontSize) { this.fontSize = fontSize; }
+
+    public String getUrl() { return url; }
+    public void setUrl(String url) { this.url = url; }
 
     @Override
     public String toString() {
