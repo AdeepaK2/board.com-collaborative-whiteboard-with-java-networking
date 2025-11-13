@@ -81,6 +81,9 @@ public class MessageHandler {
                 case "leaveRoom":
                     return handleLeaveRoom(sender, clients, clientRooms);
                     
+                case "deleteRoom":
+                    return handleDeleteRoom(sender, json, clients, clientRooms);
+                    
                 default:
                     System.out.println("Unknown message type: " + type);
                     return MessageResult.noAction();
@@ -142,7 +145,7 @@ public class MessageHandler {
                 JsonObject roomObj = new JsonObject();
                 roomObj.addProperty("roomId", room.getRoomId());
                 roomObj.addProperty("roomName", room.getRoomName());
-                roomObj.addProperty("creator", room.getCreatorUsername());
+                roomObj.addProperty("creatorUsername", room.getCreatorUsername());
                 roomObj.addProperty("participants", room.getParticipantCount());
                 roomObj.addProperty("maxParticipants", room.getMaxParticipants());
                 roomObj.addProperty("isPublic", room.isPublic());
@@ -350,7 +353,7 @@ public class MessageHandler {
                 JsonObject roomObj = new JsonObject();
                 roomObj.addProperty("roomId", room.getRoomId());
                 roomObj.addProperty("roomName", room.getRoomName());
-                roomObj.addProperty("creator", room.getCreatorUsername());
+                roomObj.addProperty("creatorUsername", room.getCreatorUsername());
                 roomObj.addProperty("participants", room.getParticipantCount());
                 roomObj.addProperty("maxParticipants", room.getMaxParticipants());
                 roomObj.addProperty("isPublic", room.isPublic());
@@ -533,5 +536,53 @@ public class MessageHandler {
             error.addProperty("message", errorMessage);
             return new MessageResult(Action.ERROR, error.toString(), null, null, null, null);
         }
+    }
+    
+    /**
+     * Handle delete room request (only creator can delete)
+     */
+    private MessageResult handleDeleteRoom(Socket sender, JsonObject json,
+                                          Map<Socket, String> clients,
+                                          Map<Socket, String> clientRooms) {
+        String username = clients.get(sender);
+        String roomId = json.has("roomId") ? json.get("roomId").getAsString() : null;
+        
+        if (username == null) {
+            return MessageResult.error("Not authenticated");
+        }
+        
+        if (roomId == null) {
+            return MessageResult.error("Room ID required");
+        }
+        
+        Room room = roomManager.getRoom(roomId);
+        if (room == null) {
+            return MessageResult.error("Room not found");
+        }
+        
+        // Check if user is the creator
+        if (!username.equals(room.getCreatorUsername())) {
+            return MessageResult.error("Only the room creator (" + room.getCreatorUsername() + ") can delete this room");
+        }
+        
+        // Remove room
+        roomManager.removeRoom(roomId);
+        
+        // Notify all participants that room was deleted
+        JsonObject notification = new JsonObject();
+        notification.addProperty("type", "roomDeleted");
+        notification.addProperty("roomId", roomId);
+        notification.addProperty("roomName", room.getRoomName());
+        notification.addProperty("message", "Room has been deleted by the creator");
+        
+        // Remove all clients from this room
+        clientRooms.entrySet().removeIf(entry -> roomId.equals(entry.getValue()));
+        
+        // Send success response to creator and broadcast deletion to all
+        JsonObject response = new JsonObject();
+        response.addProperty("type", "roomDeleteSuccess");
+        response.addProperty("message", "Room deleted successfully");
+        
+        return MessageResult.sendToSenderAndBroadcastRoomList(response.toString());
     }
 }
