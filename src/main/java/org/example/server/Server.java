@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -23,7 +24,7 @@ import java.util.concurrent.Executors;
  * - LESSON 2: Client-Server Architecture, Socket Programming
  * - LESSON 3: TCP/IP reliable connections
  * - LESSON 5: Network addressing and interfaces
- * - LESSON 6: Multithreaded server with thread-safe collections
+ * - LESSON 6: Multithreaded server with thread pool and thread-safe collections
  * - LESSON 9: HTTP protocol (WebSocket handshake)
  * 
  * Architecture: Single server class using modular components
@@ -39,6 +40,9 @@ public class Server {
     // LESSON 6: Thread-safe collections for concurrent access
     private static final Map<Socket, String> clients = new ConcurrentHashMap<>();
     private static final Map<Socket, String> clientRooms = new ConcurrentHashMap<>();
+    
+    // LESSON 6: Thread pool for WebSocket client connections (better scalability)
+    private static final ExecutorService clientThreadPool = Executors.newCachedThreadPool();
     
     // Feature modules
     private static final RoomManager roomManager = new RoomManager();
@@ -69,8 +73,8 @@ public class Server {
                     Socket clientSocket = serverSocket.accept();
                     System.out.println("New connection from: " + clientSocket.getInetAddress());
                     
-                    // LESSON 6: Handle each client in separate thread
-                    new Thread(() -> handleClient(clientSocket)).start();
+                    // LESSON 6: Use thread pool for better resource management
+                    clientThreadPool.execute(() -> handleClient(clientSocket));
                 } catch (IOException e) {
                     if (running) {
                         System.err.println("Error accepting client: " + e.getMessage());
